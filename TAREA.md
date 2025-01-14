@@ -1,0 +1,1 @@
+### crear un componente cardGuitar que renderice las tarjetas
