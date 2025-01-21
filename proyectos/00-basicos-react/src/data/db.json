@@ -1,0 +1,31 @@
+{
+    "users": [
+        { "username": "user1", "email": "user1@example.com", "password": "password1" },
+        { "username": "user2", "email": "user2@example.com", "password": "password2" },
+        { "username": "user3", "email": "user3@example.com", "password": "password3" },
+        { "username": "user4", "email": "user4@example.com", "password": "password4" },
+        { "username": "user5", "email": "user5@example.com", "password": "password5" },
+        { "username": "user6", "email": "user6@example.com", "password": "password6" },
+        { "username": "user7", "email": "user7@example.com", "password": "password7" },
+        { "username": "user8", "email": "user8@example.com", "password": "password8" },
+        { "username": "user9", "email": "user9@example.com", "password": "password9" },
+        { "username": "user10", "email": "user10@example.com", "password": "password10" },
+        { "username": "user11", "email": "user11@example.com", "password": "password11" },
+        { "username": "user12", "email": "user12@example.com", "password": "password12" },
+        { "username": "user13", "email": "user13@example.com", "password": "password13" },
+        { "username": "user14", "email": "user14@example.com", "password": "password14" },
+        { "username": "user15", "email": "user15@example.com", "password": "password15" }
+    ],
+    "products": [
+        { "id": 1, "name": "Clean Code", "price": 29.99, "tags": ["Java"], "img": "https://example.com/clean-code.jpg" },
+        { "id": 2, "name": "The Pragmatic Programmer", "price": 39.99, "tags": ["General"], "img": "https://example.com/pragmatic-programmer.jpg" },
+        { "id": 3, "name": "JavaScript: The Good Parts", "price": 24.99, "tags": ["JavaScript"], "img": "https://example.com/js-good-parts.jpg" },
+        { "id": 4, "name": "You Don't Know JS", "price": 34.99, "tags": ["JavaScript"], "img": "https://example.com/you-dont-know-js.jpg" },
+        { "id": 5, "name": "Eloquent JavaScript", "price": 29.99, "tags": ["JavaScript"], "img": "https://example.com/eloquent-js.jpg" },
+        { "id": 6, "name": "Python Crash Course", "price": 39.99, "tags": ["Python"], "img": "https://example.com/python-crash-course.jpg" },
+        { "id": 7, "name": "Learning Python", "price": 49.99, "tags": ["Python"], "img": "https://example.com/learning-python.jpg" },
+        { "id": 8, "name": "Effective Java", "price": 44.99, "tags": ["Java"], "img": "https://example.com/effective-java.jpg" },
+        { "id": 9, "name": "Head First Design Patterns", "price": 39.99, "tags": ["Java"], "img": "https://example.com/head-first-design-patterns.jpg" },
+        { "id": 10, "name": "Introduction to Algorithms", "price": 89.99, "tags": ["Algorithms"], "img": "https://example.com/introduction-to-algorithms.jpg" }
+    ]
+}
