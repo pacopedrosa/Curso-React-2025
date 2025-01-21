@@ -1,1 +1,1 @@
-### crear un componente cardGuitar que renderice las tarjetas
+- Se plantea un panel de administracion dentro de componentes en una nueva carpeta llamada useEffect. Componentes: navUser, main, todo esta englobado en un componente llamado gestUser. se crea una carpeta data con db.json, debe tener 5 users {username, email y password}
