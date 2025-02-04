@@ -26,9 +26,10 @@ const Search = () => {
       toast.error("Pokemon no encontrado", 
         {
         style: {
-        background: "#fef2f2",
-        border: "1px solid #ff",
-        color: "#991b1b",}
+          background: "#fef2f2",
+          border: "1px solid #ff",
+          color: "#991b1b",
+        },
       });
     }
   };
