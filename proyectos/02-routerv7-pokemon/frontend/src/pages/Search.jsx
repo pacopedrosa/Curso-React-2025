@@ -13,11 +13,12 @@ const Search = () => {
     //  búsqueda con ombre en la API
     try {
       const response = await fetch(
-        `https://pokeapi.co/api/v2/pokemon/${search.toLocaleLowerCase()}`
+        `${import.meta.env.VITE_API_URL}/search/${search.toLowerCase()}`
       );
       if (!response.ok) {
         throw new Error("Pokemon no encontrado");
       }
+
       // const data = await response.json();
       // console.log(data);
       // navigate(`/pokemon/${data.id}`);

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { usePokemon } from "../context/pokemonContext";
-import Spinner from "../components/spinner"; // Asegúrate de que la ruta sea correcta
+import Spinner from "../components/spinner";
+
 function Home() {
   const [pokemons, setPokemons] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -14,24 +15,15 @@ function Home() {
 
   const fetchPokemons = async () => {
     try {
-      const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=151");
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/fetch-pokemons`);
       if (!response.ok) {
         throw new Error("Error fetching data");
       }
-      const data = await response.json();
-      const pokemonsDetails = await Promise.all(
-        data.results.map(async (pokemon) => {
-          const repon = await fetch(pokemon.url);
-          if (!repon.ok) {
-            throw new Error(`Error fetching data for ${pokemon.name}`);
-          }
-          return await repon.json();
-        })
-      );
 
-      setPokemons(pokemonsDetails);
+      const data = await response.json();
+      setPokemons(data.pokemons); // Ahora data.pokemons contiene el array de pokémons completo
     } catch (error) {
-      console.log("Error fetching pokemons", error);
+      console.error("Error fetching pokemons:", error);
       setError("Error al cargar los Pokémon. Por favor, intenta de nuevo.");
     } finally {
       setIsLoading(false);
@@ -54,7 +46,7 @@ function Home() {
           <div key={pokemon.id} className="bg-white shadow-md rounded-md p-6 group">
             <div>
               <img
-                src={pokemon.sprites.front_default} 
+                src={pokemon.sprites?.other?.dream_world?.front_default || pokemon.url} 
                 alt={pokemon.name}
                 className="w-32 h-32 mx-auto transform group-hover:scale-110 transition-transform duration-500"
               />
@@ -78,8 +70,48 @@ function Home() {
         ))}
       </div>
     </div>
-    
   );
 }
 
 export default Home;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // const fetchPokemons = async () => {
+  //   try {
+  //     const response = await fetch(`${import.meta.env.VITE_API_URL}/pokemons`);
+  //     if (!response.ok) {
+  //       throw new Error("Error fetching data");
+  //     }
+  //     const data = await response.json();
+  //     const pokemonsDetails = await Promise.all(
+  //       data.results.map(async (pokemon) => {
+  //         const repon = await fetch(pokemon.url);
+  //         if (!repon.ok) {
+  //           throw new Error(`Error fetching data for ${pokemon.name}`);
+  //         }
+  //         return await repon.json();
+  //       })
+  //     );
+
+  //     setPokemons(pokemonsDetails);
+  //   } catch (error) {
+  //     console.log("Error fetching pokemons", error);
+  //     setError("Error al cargar los Pokémon. Por favor, intenta de nuevo.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
