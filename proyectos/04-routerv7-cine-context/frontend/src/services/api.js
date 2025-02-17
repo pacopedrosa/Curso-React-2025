@@ -70,9 +70,20 @@ export const reviewService = {
 export const favoriteService = {
   getFavorites: () => api.get('/favorites'),
   add: (movie) => {
-    console.log('Añadiendo película a favoritos:', movie);
+    const movieData = {
+      id: movie.id,
+      title: movie.title,
+      overview: movie.overview,
+      poster_path: movie.poster_path,
+      backdrop_path: movie.backdrop_path,
+      release_date: movie.release_date,
+      vote_average: movie.vote_average
+    };
+    
+    console.log('Datos formateados para favoritos:', movieData);
     const token = localStorage.getItem('token');
-    return api.post('/favorites', movie, {
+    
+    return api.post('/favorites', movieData, {
       headers: {
         'Authorization': `Bearer ${token}`
       }

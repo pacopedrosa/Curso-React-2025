@@ -15,16 +15,24 @@ export const getPopularMovies = async (req, res) => {
 export const getMovieById = async (req, res) => {
   try {
     const { id } = req.params;
-    let movie = await Movie.findOne({ id: Number(id) });
+    let movie = await Movie.findOne({ movieId: Number(id) });
 
     if (!movie) {
       // Si no existe en nuestra BD, lo buscamos en TMDB
       const tmdbMovie = await getMovieDetailsFromTMDB(id);
-      movie = await Movie.create(tmdbMovie);
+      
+      // Asegurarnos de que el movieId está correctamente asignado
+      const movieToCreate = {
+        ...tmdbMovie,
+        movieId: Number(id)  // Aseguramos que se guarde como movieId
+      };
+      
+      movie = await Movie.create(movieToCreate);
     }
 
     res.json(movie);
   } catch (error) {
+    console.error('Error al obtener película:', error);
     res.status(500).json({ message: error.message });
   }
 };

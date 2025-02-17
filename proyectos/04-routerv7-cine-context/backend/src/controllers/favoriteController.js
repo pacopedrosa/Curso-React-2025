@@ -12,47 +12,52 @@ export const getFavorites = async (req, res) => {
 };
 
 export const addFavorite = async (req, res) => {
-    console.log('[addFavorite] Starting with data:', {
-        body: req.body,
-        user: req.user,
-        headers: req.headers
-    });
-    
     try {
         const movieData = req.body;
         const userId = req.user.id;
         
         if (!movieData.id) {
-            console.error('[addFavorite] No movieId provided');
-            return res.status(400).json({ message: 'Se requiere movieId' });
+            return res.status(400).json({ message: 'Se requiere ID de película' });
         }
 
-        await Movie.findOneAndUpdate(
+        // Usar findOneAndUpdate con upsert para evitar duplicados
+        const movie = await Movie.findOneAndUpdate(
             { movieId: movieData.id },
             {
                 movieId: movieData.id,
-                title: movieData.title,
+                title: movieData.title || 'Sin título',
                 overview: movieData.overview,
                 poster_path: movieData.poster_path,
                 backdrop_path: movieData.backdrop_path,
                 release_date: movieData.release_date,
                 vote_average: movieData.vote_average
             },
-            { upsert: true }
+            { 
+                upsert: true, 
+                new: true,
+                runValidators: true 
+            }
         );
 
+        // Verificar si ya existe el favorito
+        const existingFavorite = await Favorite.findOne({
+            user: userId,
+            movieId: movieData.id
+        });
+
+        if (existingFavorite) {
+            return res.status(400).json({ message: 'Esta película ya está en favoritos' });
+        }
+
+        // Crear el favorito usando el movieId correcto
         const favorite = await Favorite.create({
             user: userId,
             movieId: movieData.id
         });
 
-        console.log('[addFavorite] Created successfully:', favorite);
         res.status(201).json(favorite);
     } catch (error) {
         console.error('[addFavorite] Error:', error);
-        if (error.code === 11000) {
-            return res.status(400).json({ message: 'Esta película ya está en favoritos' });
-        }
         res.status(500).json({ message: error.message });
     }
 };
