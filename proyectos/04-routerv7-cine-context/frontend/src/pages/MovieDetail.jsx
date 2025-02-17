@@ -119,6 +119,22 @@ const MovieDetail = () => {
     }
   };
 
+  const handleDeleteReview = async (reviewId) => {
+    if (!reviewId) {
+      console.error('ID de reseña no válido:', reviewId);
+      showToast('Error al eliminar la reseña', 'error');
+      return;
+    }
+
+    try {
+      await deleteReview(movieId, reviewId);
+      showToast('Reseña eliminada correctamente', 'success');
+    } catch (error) {
+      console.error('Error al eliminar la reseña:', error);
+      showToast('Error al eliminar la reseña', 'error');
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Hero Section con imagen de fondo */}
@@ -236,9 +252,9 @@ const MovieDetail = () => {
                   ) : (
                     movieReviews.map(review => (
                       <ReviewItem 
-                        key={review.id} 
-                        review={review} 
-                        onDelete={(reviewId) => deleteReview(movieId, reviewId)}
+                        key={review._id}
+                        review={review}
+                        onDelete={() => handleDeleteReview(review._id)}
                       />
                     ))
                   )}

@@ -63,6 +63,11 @@ export const ReviewsProvider = ({ children }) => {
     };
 
     const deleteReview = async (movieId, reviewId) => {
+        if (!reviewId) {
+            console.error('ID de reseña no válido');
+            throw new Error('ID de reseña no válido');
+        }
+
         try {
             const response = await reviewService.delete(reviewId);
             if (response.status === 200) {
@@ -77,11 +82,10 @@ export const ReviewsProvider = ({ children }) => {
                         [movieId]: updatedMovieReviews
                     };
                 });
-                showToast('Reseña eliminada correctamente', 'warning');
+                return response;
             }
         } catch (error) {
             console.error('Error al eliminar la reseña:', error);
-            showToast('Error al eliminar la reseña', 'error');
             throw error;
         }
     };
