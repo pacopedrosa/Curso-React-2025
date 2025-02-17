@@ -4,7 +4,7 @@ import { getImageUrl, getMovieDetails, getMovieVideos, IMAGES_SIZES } from "../s
 import { PacmanLoader } from "react-spinners"
 import { useFavorites } from '../contexts/FavoritesContext'
 import { useReviews } from '../contexts/ReviewsContext'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ReviewForm from '../components/ReviewForm'
 import ReviewItem from '../components/ReviewItem'
 import { reviewService, favoriteService } from '../services/api'
@@ -15,10 +15,9 @@ const MovieDetail = () => {
   const {id} = useParams()
   const movieId = Number(id.replace(':', ''))
   const [newReview, setNewReview] = useState('')
-  const {data: movieData, loading, error} = useFetch(() => {
-    if (!id) throw new Error('ID de película no válido');
-    return getMovieDetails(Number(id.replace(':', '')));
-  }, [id])
+  const [movieData, setMovieData] = useState(null)
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(true)
   const {data: videoData} = useFetch(() => getMovieVideos(Number(id.replace(':', ''))), [id])
   const { toggleFavorite, isFavorite } = useFavorites()
   const isMovieFavorite = isFavorite(movieData?.id)
@@ -27,6 +26,24 @@ const MovieDetail = () => {
   const { isAuthenticated } = useAuth()
   const { showToast } = useToast()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const fetchMovie = async () => {
+      setLoading(true)
+      try {
+        const data = await getMovieDetails(movieId);
+        setMovieData(data);
+      } catch (err) {
+        console.error('Error al obtener la película:', err);
+        setError(err);
+        showToast('Error al cargar los detalles de la película', 'error');
+      } finally {
+        setLoading(false)
+      }
+    };
+
+    fetchMovie();
+  }, [movieId]);
 
   if(error){
     return <div className="text-center p-10">
@@ -54,18 +71,18 @@ const MovieDetail = () => {
     
   const handleSubmitReview = async (e) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+        showToast('Debes iniciar sesión para escribir reseñas', 'error');
+        navigate('/login');
+        return;
+    }
+    
     try {
-      await reviewService.create({
-        movieId,
-        text: newReview,
-        rating: rating // si tienes un sistema de rating
-      });
-      // Recargar reseñas
-      const { data } = await reviewService.getMovieReviews(movieId);
-      setReviews(data.reviews);
-      setNewReview('');
+        await addReview(movieId, newReview);
+        setNewReview('');
     } catch (error) {
-      console.error('Error al crear reseña:', error);
+        console.error('Error al crear reseña:', error);
+        showToast('Error al crear la reseña', 'error');
     }
   };
 

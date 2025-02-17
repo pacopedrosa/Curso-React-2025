@@ -43,27 +43,39 @@ export const ReviewsProvider = ({ children }) => {
 
     const addReview = async (movieId, text) => {
         try {
-            const { data } = await reviewService.createReview({ movieId, text });
+            const response = await reviewService.create({
+                movieId: Number(movieId),
+                text: text
+            });
+            
             setReviews(prev => ({
                 ...prev,
-                [movieId]: [...(prev[movieId] || []), data]
+                [movieId]: [...(prev[movieId] || []), response.data]
             }));
+            
             showToast('Reseña añadida correctamente', 'success');
+            return response.data;
         } catch (error) {
+            console.error('Error al crear reseña:', error);
             showToast('Error al añadir la reseña', 'error');
+            throw error;
         }
     };
 
     const deleteReview = async (movieId, reviewId) => {
         try {
-            await reviewService.deleteReview(reviewId);
-            setReviews(prev => ({
-                ...prev,
-                [movieId]: prev[movieId].filter(review => review.id !== reviewId)
-            }));
-            showToast('Reseña eliminada correctamente', 'warning');
+            const response = await reviewService.delete(reviewId);
+            if (response.status === 200) {
+                setReviews(prev => ({
+                    ...prev,
+                    [movieId]: prev[movieId].filter(review => review._id !== reviewId)
+                }));
+                showToast('Reseña eliminada correctamente', 'warning');
+            }
         } catch (error) {
+            console.error('Error al eliminar la reseña:', error);
             showToast('Error al eliminar la reseña', 'error');
+            throw error;
         }
     };
 

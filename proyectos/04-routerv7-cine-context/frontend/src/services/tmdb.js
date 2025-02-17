@@ -104,7 +104,7 @@ export const getMovieDetails = async (id) => {
     return data;
   } catch (error) {
     console.error('Error al obtener detalles de la película:', error);
-    return null;
+    throw error;
   }
 };
 
