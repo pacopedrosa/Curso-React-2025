@@ -2,6 +2,7 @@ import { useState, useEffect, useContext, createContext } from "react";
 import { useToast } from "./ToastContext";
 import { favoriteService } from '../services/api';
 import { useAuth } from './AuthContext';
+import { movieService } from '../services/api';
 
 const FavoritesContext = createContext();
 
@@ -18,18 +19,32 @@ export const FavoritesProvider = ({children}) => {
     const { isAuthenticated } = useAuth();
     const [favorites, setFavorites] = useState([]);
 
+    const loadFavoriteDetails = async (favorite) => {
+        try {
+            const { data: movieDetails } = await movieService.getMovie(favorite.movieId);
+            return {
+                ...favorite,
+                movie: movieDetails
+            };
+        } catch (error) {
+            console.error(`Error al cargar detalles de película ${favorite.movieId}:`, error);
+            return favorite;
+        }
+    };
+
     useEffect(() => {
         const loadFavorites = async () => {
             if (!isAuthenticated) return;
             
             try {
                 const { data } = await favoriteService.getFavorites();
-                console.log('Favoritos cargados:', data);
-                setFavorites(data);
+                const favoritesWithDetails = await Promise.all(
+                    data.map(loadFavoriteDetails)
+                );
+                setFavorites(favoritesWithDetails);
             } catch (error) {
                 console.error('Error al cargar favoritos:', error);
                 if (error.response?.status === 404) {
-                    console.error('Endpoint de favoritos no encontrado');
                     showToast('Servicio de favoritos no disponible', 'error');
                 } else if (error.response?.status === 401) {
                     showToast('Error de autenticación', 'error');
