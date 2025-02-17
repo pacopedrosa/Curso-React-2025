@@ -71,7 +71,7 @@ export const favoriteService = {
   getFavorites: () => api.get('/favorites'),
   add: (movie) => {
     const movieData = {
-      id: movie.id,
+      id: movie.movieId || movie.id,
       title: movie.title,
       overview: movie.overview,
       poster_path: movie.poster_path,
@@ -79,6 +79,11 @@ export const favoriteService = {
       release_date: movie.release_date,
       vote_average: movie.vote_average
     };
+    
+    if (!movieData.id) {
+      console.error('No se encontró ID de película válido:', movie);
+      throw new Error('ID de película no válido');
+    }
     
     console.log('Datos formateados para favoritos:', movieData);
     const token = localStorage.getItem('token');
@@ -89,7 +94,13 @@ export const favoriteService = {
       }
     });
   },
-  remove: (movieId) => {
+  remove: (movie) => {
+    const movieId = movie.movieId || movie.id;
+    if (!movieId) {
+      console.error('No se encontró ID de película válido para eliminar:', movie);
+      throw new Error('ID de película no válido');
+    }
+    
     const token = localStorage.getItem('token');
     return api.delete(`/favorites/${movieId}`, {
       headers: {

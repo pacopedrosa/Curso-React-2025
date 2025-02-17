@@ -53,17 +53,17 @@ export const FavoritesProvider = ({children}) => {
             console.log('Token actual:', token);
             console.log('Intentando gestionar favorito para película:', movie);
             
-            const isFav = favorites.some(fav => fav.movieId === movie.id);
+            const isFav = favorites.some(fav => fav.movieId === (movie.movieId || movie.id));
             if (isFav) {
-                const response = await favoriteService.remove(movie.id);
+                const response = await favoriteService.remove(movie);
                 if (response.data) {
-                    setFavorites(prev => prev.filter(fav => fav.movieId !== movie.id));
+                    setFavorites(prev => prev.filter(fav => fav.movieId !== (movie.movieId || movie.id)));
                     showToast(`${movie.title} eliminada de favoritos`, "warning");
                 }
             } else {
                 const response = await favoriteService.add(movie);
                 if (response.data) {
-                    setFavorites(prev => [...prev, { movieId: movie.id, movie }]);
+                    setFavorites(prev => [...prev, { movieId: movie.movieId || movie.id, movie }]);
                     showToast(`${movie.title} añadida a favoritos`, "success");
                 }
             }
