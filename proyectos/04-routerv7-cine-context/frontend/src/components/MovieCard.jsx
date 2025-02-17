@@ -2,15 +2,16 @@ import { Link } from 'react-router-dom'
 import { getImageUrl } from '../services/tmdb'
 import { useFavorites } from '../contexts/FavoritesContext'
 
-const MovieCard = ({movie}) => {
+const MovieCard = ({ movie }) => {
     if (!movie) return null;
     
     const rating = movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A';
     const { toggleFavorite, isFavorite } = useFavorites();
     const isMovieFavorite = isFavorite(movie.id);
+    const movieId = movie.movieId || movie.id;
 
     return (
-        <Link to={`/movie/:${movie.id}`} className='bg-sky-800 p-4 rounded-lg'>
+        <Link to={`/movie/${movieId}`} className='bg-sky-800 p-4 rounded-lg'>
             <article className='card transform transition-transform duration-300 hover:scale-105'>
                 <div className='relative aspect-[2/3]'>
                     <img src={getImageUrl(movie.poster_path)} alt={movie.title} className='w-full h-full object-cover rounded-lg'></img>

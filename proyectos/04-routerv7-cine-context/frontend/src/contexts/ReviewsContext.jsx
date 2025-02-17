@@ -66,10 +66,17 @@ export const ReviewsProvider = ({ children }) => {
         try {
             const response = await reviewService.delete(reviewId);
             if (response.status === 200) {
-                setReviews(prev => ({
-                    ...prev,
-                    [movieId]: prev[movieId].filter(review => review._id !== reviewId)
-                }));
+                setReviews(prev => {
+                    const updatedMovieReviews = prev[movieId].filter(review => review._id !== reviewId);
+                    if (updatedMovieReviews.length === 0) {
+                        const { [movieId]: _, ...rest } = prev;
+                        return rest;
+                    }
+                    return {
+                        ...prev,
+                        [movieId]: updatedMovieReviews
+                    };
+                });
                 showToast('Reseña eliminada correctamente', 'warning');
             }
         } catch (error) {

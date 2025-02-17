@@ -15,6 +15,11 @@ export const getPopularMovies = async (req, res) => {
 export const getMovieById = async (req, res) => {
   try {
     const { id } = req.params;
+    
+    if (!id || isNaN(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({ message: 'ID de película no válido' });
+    }
+
     let movie = await Movie.findOne({ movieId: Number(id) });
 
     if (!movie) {

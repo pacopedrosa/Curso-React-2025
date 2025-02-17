@@ -12,13 +12,13 @@ import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../contexts/ToastContext'
 
 const MovieDetail = () => {
-  const {id} = useParams()
-  const movieId = Number(id.replace(':', ''))
+  const { id } = useParams()
+  const movieId = id ? Number(id) : null;
   const [newReview, setNewReview] = useState('')
   const [movieData, setMovieData] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
-  const {data: videoData} = useFetch(() => getMovieVideos(Number(id.replace(':', ''))), [id])
+  const {data: videoData} = useFetch(() => getMovieVideos(movieId), [movieId])
   const { toggleFavorite, isFavorite } = useFavorites()
   const isMovieFavorite = isFavorite(movieData?.id)
   const { addReview, deleteReview, getMovieReviews } = useReviews()
@@ -29,9 +29,20 @@ const MovieDetail = () => {
 
   useEffect(() => {
     const fetchMovie = async () => {
+      if (!movieId || isNaN(movieId) || movieId <= 0) {
+        console.error('ID inválido:', { id, movieId });
+        setError(new Error('ID de película no válido'));
+        showToast('ID de película no válido', 'error');
+        navigate('/');
+        return;
+      }
+      
       setLoading(true)
       try {
         const data = await getMovieDetails(movieId);
+        if (!data) {
+          throw new Error('No se encontraron datos de la película');
+        }
         setMovieData(data);
       } catch (err) {
         console.error('Error al obtener la película:', err);
@@ -43,7 +54,7 @@ const MovieDetail = () => {
     };
 
     fetchMovie();
-  }, [movieId]);
+  }, [movieId, navigate]);
 
   if(error){
     return <div className="text-center p-10">

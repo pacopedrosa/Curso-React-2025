@@ -3,6 +3,7 @@ import { useToast } from "./ToastContext";
 import { favoriteService } from '../services/api';
 import { useAuth } from './AuthContext';
 import { movieService } from '../services/api';
+import { Link } from "react-router-dom";
 
 const FavoritesContext = createContext();
 
@@ -21,9 +22,15 @@ export const FavoritesProvider = ({children}) => {
 
     const loadFavoriteDetails = async (favorite) => {
         try {
-            const { data: movieDetails } = await movieService.getMovie(favorite.movieId);
+            const movieId = Number(favorite.movieId || favorite.id);
+            if (!movieId || isNaN(movieId)) {
+                console.error('Favorito sin ID válido:', favorite);
+                return favorite;
+            }
+            const { data: movieDetails } = await movieService.getMovie(movieId);
             return {
                 ...favorite,
+                movieId: movieId,
                 movie: movieDetails
             };
         } catch (error) {
@@ -58,6 +65,12 @@ export const FavoritesProvider = ({children}) => {
     }, [isAuthenticated]);
 
     const toggleFavorite = async (movie) => {
+        if (!movie || (!movie.id && !movie.movieId)) {
+            showToast('Datos de película no válidos', 'error');
+            return;
+        }
+        
+        const movieId = movie.movieId || movie.id;
         const token = localStorage.getItem('token');
         if (!token) {
             showToast('Sesión expirada, por favor vuelve a iniciar sesión', 'error');
@@ -68,17 +81,17 @@ export const FavoritesProvider = ({children}) => {
             console.log('Token actual:', token);
             console.log('Intentando gestionar favorito para película:', movie);
             
-            const isFav = favorites.some(fav => fav.movieId === (movie.movieId || movie.id));
+            const isFav = favorites.some(fav => fav.movieId === movieId);
             if (isFav) {
                 const response = await favoriteService.remove(movie);
                 if (response.data) {
-                    setFavorites(prev => prev.filter(fav => fav.movieId !== (movie.movieId || movie.id)));
+                    setFavorites(prev => prev.filter(fav => fav.movieId !== movieId));
                     showToast(`${movie.title} eliminada de favoritos`, "warning");
                 }
             } else {
                 const response = await favoriteService.add(movie);
                 if (response.data) {
-                    setFavorites(prev => [...prev, { movieId: movie.movieId || movie.id, movie }]);
+                    setFavorites(prev => [...prev, { movieId, movie }]);
                     showToast(`${movie.title} añadida a favoritos`, "success");
                 }
             }
@@ -98,7 +111,11 @@ export const FavoritesProvider = ({children}) => {
         <FavoritesContext.Provider value={{
             favorites,
             toggleFavorite,
-            isFavorite: (movieId) => favorites.some(fav => fav.movieId === movieId),
+            isFavorite: (movieId) => {
+                if (!movieId) return false;
+                const numericId = Number(movieId);
+                return favorites.some(fav => Number(fav.movieId) === numericId);
+            },
             getFavorites: () => favorites
         }}>
             {children}

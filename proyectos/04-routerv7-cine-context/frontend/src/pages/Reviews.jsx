@@ -11,7 +11,7 @@ const Reviews = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   
-  const movieIds = Object.keys(reviews)
+  const movieIds = Object.keys(reviews).map(Number)
 
   const fetchMovieDetails = async () => {
     const details = {}
@@ -20,7 +20,7 @@ const Reviews = () => {
     try {
       const promises = movieIds.map(async (id) => {
         try {
-          const data = await getMovieDetails(Number(id))
+          const data = await getMovieDetails(id)
           details[id] = data
         } catch (err) {
           console.error(`Error al cargar detalles de película ${id}:`, err)
@@ -43,8 +43,9 @@ const Reviews = () => {
       fetchMovieDetails()
     } else {
       setLoading(false)
+      setMovieDetails({})
     }
-  }, [movieIds.length])
+  }, [movieIds.length, reviews])
 
   const handleDeleteReview = async (movieId, reviewId) => {
     try {
@@ -88,7 +89,7 @@ const Reviews = () => {
 
           return (
             <div key={movieId} className="border p-4 rounded-lg shadow">
-              <Link to={`/movie/:${movieId}`} className="text-xl font-semibold text-blue-600">
+              <Link to={`/movie/${Number(movieId)}`} className="text-xl font-semibold text-blue-600">
                 {movie.title}
               </Link>
               <div className="space-y-4 mt-4">
