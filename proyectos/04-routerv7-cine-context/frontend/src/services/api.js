@@ -60,18 +60,49 @@ export const movieService = {
 
 // Review services
 export const reviewService = {
-  getUserReviews: () => api.get('/reviews/user'),
-  getMovieReviews: (movieId) => api.get(`/reviews/movie/${movieId}`),
-  create: (reviewData) => api.post('/reviews', reviewData),
-  delete: (reviewId) => api.delete(`/reviews/${reviewId}`)
+  getUserReviews: () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return Promise.reject(new Error('No hay token disponible'));
+    }
+    return api.get('/reviews/user', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  },
+  create: (reviewData) => {
+    const token = localStorage.getItem('token');
+    return api.post('/reviews', reviewData, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  },
+  delete: (reviewId) => {
+    const token = localStorage.getItem('token');
+    return api.delete(`/reviews/${reviewId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  }
 };
 
 // Favorite services
 export const favoriteService = {
-  getFavorites: () => api.get('/favorites'),
+  getFavorites: () => {
+    const token = localStorage.getItem('token');
+    return api.get('/favorites', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  },
   add: (movie) => {
     const movieData = {
-      id: movie.movieId || movie.id,
+      id: movie.id,
+      movieId: movie.id,
       title: movie.title,
       overview: movie.overview,
       poster_path: movie.poster_path,
@@ -80,14 +111,7 @@ export const favoriteService = {
       vote_average: movie.vote_average
     };
     
-    if (!movieData.id) {
-      console.error('No se encontró ID de película válido:', movie);
-      throw new Error('ID de película no válido');
-    }
-    
-    console.log('Datos formateados para favoritos:', movieData);
     const token = localStorage.getItem('token');
-    
     return api.post('/favorites', movieData, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -95,12 +119,7 @@ export const favoriteService = {
     });
   },
   remove: (movie) => {
-    const movieId = movie.movieId || movie.id;
-    if (!movieId) {
-      console.error('No se encontró ID de película válido para eliminar:', movie);
-      throw new Error('ID de película no válido');
-    }
-    
+    const movieId = movie.id || movie.movieId;
     const token = localStorage.getItem('token');
     return api.delete(`/favorites/${movieId}`, {
       headers: {

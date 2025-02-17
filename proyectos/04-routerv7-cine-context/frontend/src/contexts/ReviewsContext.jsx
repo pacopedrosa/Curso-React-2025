@@ -27,17 +27,24 @@ export const ReviewsProvider = ({ children }) => {
     const loadUserReviews = async () => {
         try {
             const { data } = await reviewService.getUserReviews();
-            const reviewsByMovie = data.reduce((acc, review) => {
-                if (!acc[review.movieId]) {
-                    acc[review.movieId] = [];
-                }
-                acc[review.movieId].push(review);
-                return acc;
-            }, {});
-            setReviews(reviewsByMovie);
+            if (Array.isArray(data)) {
+                const reviewsByMovie = data.reduce((acc, review) => {
+                    const movieId = Number(review.movieId);
+                    if (!acc[movieId]) {
+                        acc[movieId] = [];
+                    }
+                    acc[movieId].push(review);
+                    return acc;
+                }, {});
+                setReviews(reviewsByMovie);
+            } else {
+                console.error('Datos de reseñas no válidos:', data);
+                setReviews({});
+            }
         } catch (error) {
             console.error('Error al cargar reseñas:', error);
             showToast('Error al cargar las reseñas', 'error');
+            setReviews({});
         }
     };
 
