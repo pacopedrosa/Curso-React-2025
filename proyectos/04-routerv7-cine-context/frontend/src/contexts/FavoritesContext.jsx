@@ -19,22 +19,28 @@ export const FavoritesProvider = ({children}) => {
     const [favorites, setFavorites] = useState([]);
 
     useEffect(() => {
-        if (isAuthenticated) {
-            loadFavorites();
-        }
-    }, [isAuthenticated]);
-
-    const loadFavorites = async () => {
-        try {
-            const { data } = await favoriteService.getFavorites();
-            setFavorites(data);
-        } catch (error) {
-            console.error('Error al cargar favoritos:', error);
-            if (error.response?.status === 401) {
-                showToast('Debes iniciar sesión para ver tus favoritos', 'error');
+        const loadFavorites = async () => {
+            if (!isAuthenticated) return;
+            
+            try {
+                const { data } = await favoriteService.getFavorites();
+                console.log('Favoritos cargados:', data);
+                setFavorites(data);
+            } catch (error) {
+                console.error('Error al cargar favoritos:', error);
+                if (error.response?.status === 404) {
+                    console.error('Endpoint de favoritos no encontrado');
+                    showToast('Servicio de favoritos no disponible', 'error');
+                } else if (error.response?.status === 401) {
+                    showToast('Error de autenticación', 'error');
+                } else {
+                    showToast('Error al cargar favoritos', 'error');
+                }
             }
-        }
-    };
+        };
+
+        loadFavorites();
+    }, [isAuthenticated]);
 
     const toggleFavorite = async (movie) => {
         if (!isAuthenticated) {
@@ -43,19 +49,27 @@ export const FavoritesProvider = ({children}) => {
         }
 
         try {
-            const isFav = favorites.some(fav => fav.id === movie.id);
+            console.log('Intentando gestionar favorito para película:', movie);
+            
+            const isFav = favorites.some(fav => fav.movieId === movie.id);
             if (isFav) {
                 await favoriteService.remove(movie.id);
-                setFavorites(prev => prev.filter(fav => fav.id !== movie.id));
+                setFavorites(prev => prev.filter(fav => fav.movieId !== movie.id));
                 showToast(`${movie.title} eliminada de favoritos`, "warning");
             } else {
-                await favoriteService.add(movie.id);
-                setFavorites(prev => [...prev, movie]);
-                showToast(`${movie.title} añadida a favoritos`, "success");
+                const response = await favoriteService.add(movie.id);
+                if (response.data) {
+                    setFavorites(prev => [...prev, { movieId: movie.id, movie }]);
+                    showToast(`${movie.title} añadida a favoritos`, "success");
+                }
             }
         } catch (error) {
-            console.error('Error al gestionar favorito:', error);
-            showToast('Error al gestionar favorito', 'error');
+            console.error('Error detallado al gestionar favorito:', error);
+            if (error.response?.status === 404) {
+                showToast('Servicio de favoritos no disponible', 'error');
+            } else {
+                showToast('Error al gestionar favorito', 'error');
+            }
         }
     };
 
@@ -63,7 +77,7 @@ export const FavoritesProvider = ({children}) => {
         <FavoritesContext.Provider value={{
             favorites,
             toggleFavorite,
-            isFavorite: (movieId) => favorites.some(fav => fav.id === movieId),
+            isFavorite: (movieId) => favorites.some(fav => fav.movieId === movieId),
             getFavorites: () => favorites
         }}>
             {children}

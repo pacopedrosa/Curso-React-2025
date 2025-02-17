@@ -22,17 +22,17 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const checkAuth = async () => {
-            const token = localStorage.getItem('token');
-            if (token) {
-                try {
-                    const { data } = await authService.verifyToken();
-                    setUser(data.user);
-                    setIsAuthenticated(true);
-                } catch (error) {
-                    localStorage.removeItem('token');
-                }
+            try {
+                const { data } = await authService.verifyToken();
+                setUser(data.user);
+                setIsAuthenticated(true);
+            } catch (error) {
+                console.error('Error al verificar autenticación:', error);
+                setUser(null);
+                setIsAuthenticated(false);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
         
         checkAuth();
@@ -40,49 +40,31 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (credentials) => {
         try {
-            console.log('Iniciando proceso de login con credenciales:', credentials);
-            
-            const response = await fetch('http://localhost:3000/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(credentials)
-            });
-
-            const data = await response.json();
-            console.log('Respuesta del servidor:', data);
-
-            if (!response.ok) {
-                console.error('Error en la respuesta:', response.status);
-                throw new Error(data.message || 'Error al iniciar sesión');
-            }
-
-            console.log('Login exitoso, actualizando estado...');
-            
-            // Actualizar estado
-            localStorage.setItem('token', data.token);
-            setUser(data.user);
+            const { user } = await authService.login(credentials);
+            setUser(user);
             setIsAuthenticated(true);
-            
-            console.log('Estado actualizado correctamente');
             showToast('Inicio de sesión exitoso', 'success');
-            
-            return data;
-
+            return { user };
         } catch (error) {
-            console.error('Error detallado en login:', error);
+            console.error('Error en login:', error);
+            setUser(null);
+            setIsAuthenticated(false);
             showToast(error.message || 'Error al iniciar sesión', 'error');
             throw error;
         }
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        setUser(null);
-        setIsAuthenticated(false);
-        showToast('Sesión cerrada exitosamente', 'success');
-        navigate('/login');
+    const logout = async () => {
+        try {
+            await authService.logout();
+            setUser(null);
+            setIsAuthenticated(false);
+            showToast('Sesión cerrada exitosamente', 'success');
+            navigate('/login');
+        } catch (error) {
+            console.error('Error al cerrar sesión:', error);
+            showToast('Error al cerrar sesión', 'error');
+        }
     };
 
     const value = {

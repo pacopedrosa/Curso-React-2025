@@ -1,24 +1,20 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api'
-});
-
-// Interceptor para añadir el token a las peticiones
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+  baseURL: 'http://localhost:3000/api',
+  withCredentials: true
 });
 
 // Interceptor para manejar errores de autenticación
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('Respuesta exitosa:', response.status);
+    return response;
+  },
   (error) => {
+    console.error('Error en la respuesta:', error.response?.status);
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
+      console.log('Error de autenticación detectado');
     }
     return Promise.reject(error);
   }
@@ -30,16 +26,16 @@ export const authService = {
     return await api.post('/auth/register', userData);
   },
   login: async (credentials) => {
-    return await api.post('/auth/login', {
-      username: credentials.username,
-      password: credentials.password
-    });
+    try {
+      const response = await api.post('/auth/login', credentials);
+      return response.data;
+    } catch (error) {
+      console.error('Error en login:', error);
+      throw error;
+    }
   },
   verifyToken: () => api.get('/auth/verify'),
-  logout: () => {
-    localStorage.removeItem('token');
-    return Promise.resolve();
-  }
+  logout: () => api.post('/auth/logout')
 };
 
 // Movie services
@@ -53,13 +49,18 @@ export const movieService = {
 export const reviewService = {
   getUserReviews: () => api.get('/reviews/user'),
   getMovieReviews: (movieId) => api.get(`/reviews/movie/${movieId}`),
-  createReview: (review) => api.post('/reviews', review),
-  deleteReview: (reviewId) => api.delete(`/reviews/${reviewId}`)
+  create: (reviewData) => api.post('/reviews', reviewData),
+  delete: (reviewId) => api.delete(`/reviews/${reviewId}`)
 };
 
 // Favorite services
 export const favoriteService = {
   getFavorites: () => api.get('/favorites'),
-  add: (movieId) => api.post('/favorites', { movieId }),
+  add: (movieId) => {
+    console.log('Añadiendo película a favoritos:', movieId);
+    return api.post('/favorites', { movieId });
+  },
   remove: (movieId) => api.delete(`/favorites/${movieId}`)
-}; 
+};
+
+export default api; 
