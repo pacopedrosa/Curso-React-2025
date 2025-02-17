@@ -8,11 +8,12 @@ import {
 
 const router = express.Router();
 
-// Todas las rutas de favoritos requieren autenticación
+// Middleware de autenticación
 router.use(authMiddleware);
 
+// Definición de rutas
 router.get('/', getFavorites);
-router.post('/:movieId', addFavorite);
+router.post('/', addFavorite);
 router.delete('/:movieId', removeFavorite);
 
 export default router;

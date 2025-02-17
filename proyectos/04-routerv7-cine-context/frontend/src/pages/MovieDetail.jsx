@@ -76,6 +76,13 @@ const MovieDetail = () => {
         return;
     }
 
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showToast('Sesión expirada, por favor vuelve a iniciar sesión', 'error');
+        navigate('/login');
+        return;
+    }
+
     try {
         await toggleFavorite(movieData);
     } catch (error) {

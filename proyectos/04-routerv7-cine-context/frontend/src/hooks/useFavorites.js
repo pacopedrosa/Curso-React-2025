@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { favoriteAPI } from '../services/api';
+import { favoriteService } from '../services/api';
 
 export const useFavorites = () => {
   const [favorites, setFavorites] = useState([]);
@@ -10,7 +10,7 @@ export const useFavorites = () => {
 
   const loadFavorites = async () => {
     try {
-      const { data } = await favoriteAPI.getAll();
+      const { data } = await favoriteService.getFavorites();
       setFavorites(data);
     } catch (error) {
       console.error('Error al cargar favoritos:', error);
@@ -21,10 +21,10 @@ export const useFavorites = () => {
     try {
       const isFav = favorites.some(fav => fav.id === movieId);
       if (isFav) {
-        await favoriteAPI.remove(movieId);
+        await favoriteService.removeFavorite(movieId);
         setFavorites(favorites.filter(fav => fav.id !== movieId));
       } else {
-        await favoriteAPI.add(movieId);
+        await favoriteService.addFavorite(movieId);
         setFavorites([...favorites, { id: movieId }]);
       }
     } catch (error) {

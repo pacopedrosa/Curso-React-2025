@@ -10,7 +10,7 @@ import PrivateRoute from './components/PrivateRoute';
 import MovieList from './pages/MovieList';
 import MovieDetail from './pages/MovieDetail';
 import Favorites from './pages/Favorites';
-import UserReviews from './pages/UserReviews';
+import Reviews from './pages/Reviews';
 import Profile from './pages/Profile';
 
 const App = () => {
@@ -35,7 +35,7 @@ const App = () => {
                     } />
                     <Route path="/my-reviews" element={
                       <PrivateRoute>
-                        <UserReviews />
+                        <Reviews />
                       </PrivateRoute>
                     } />
                     <Route path="/profile" element={

@@ -20,6 +20,15 @@ api.interceptors.response.use(
   }
 );
 
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+
 // Auth services
 export const authService = {
   register: async (userData) => {
@@ -28,6 +37,10 @@ export const authService = {
   login: async (credentials) => {
     try {
       const response = await api.post('/auth/login', credentials);
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      }
       return response.data;
     } catch (error) {
       console.error('Error en login:', error);
@@ -56,11 +69,24 @@ export const reviewService = {
 // Favorite services
 export const favoriteService = {
   getFavorites: () => api.get('/favorites'),
-  add: (movieId) => {
-    console.log('Añadiendo película a favoritos:', movieId);
-    return api.post('/favorites', { movieId });
+  add: (movie) => {
+    console.log('Añadiendo película a favoritos:', movie);
+    const token = localStorage.getItem('token');
+    return api.post('/favorites', movie, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
   },
-  remove: (movieId) => api.delete(`/favorites/${movieId}`)
+  remove: (movieId) => {
+    const token = localStorage.getItem('token');
+    return api.delete(`/favorites/${movieId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  }
 };
+
 
 export default api; 

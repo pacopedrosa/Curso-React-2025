@@ -43,21 +43,25 @@ export const FavoritesProvider = ({children}) => {
     }, [isAuthenticated]);
 
     const toggleFavorite = async (movie) => {
-        if (!isAuthenticated) {
-            showToast('Debes iniciar sesión para gestionar favoritos', 'error');
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showToast('Sesión expirada, por favor vuelve a iniciar sesión', 'error');
             return;
         }
 
         try {
+            console.log('Token actual:', token);
             console.log('Intentando gestionar favorito para película:', movie);
             
             const isFav = favorites.some(fav => fav.movieId === movie.id);
             if (isFav) {
-                await favoriteService.remove(movie.id);
-                setFavorites(prev => prev.filter(fav => fav.movieId !== movie.id));
-                showToast(`${movie.title} eliminada de favoritos`, "warning");
+                const response = await favoriteService.remove(movie.id);
+                if (response.data) {
+                    setFavorites(prev => prev.filter(fav => fav.movieId !== movie.id));
+                    showToast(`${movie.title} eliminada de favoritos`, "warning");
+                }
             } else {
-                const response = await favoriteService.add(movie.id);
+                const response = await favoriteService.add(movie);
                 if (response.data) {
                     setFavorites(prev => [...prev, { movieId: movie.id, movie }]);
                     showToast(`${movie.title} añadida a favoritos`, "success");
@@ -65,8 +69,10 @@ export const FavoritesProvider = ({children}) => {
             }
         } catch (error) {
             console.error('Error detallado al gestionar favorito:', error);
-            if (error.response?.status === 404) {
-                showToast('Servicio de favoritos no disponible', 'error');
+            if (error.response?.status === 401) {
+                showToast('Sesión expirada, por favor vuelve a iniciar sesión', 'error');
+            } else if (error.response?.status === 404) {
+                showToast('Ruta de favoritos no encontrada', 'error');
             } else {
                 showToast('Error al gestionar favorito', 'error');
             }

@@ -4,10 +4,8 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import routes from './routes/index.js';
-import movieRoutes from './routes/movieRoutes.js';
-import favoriteRoutes from './routes/favoriteRoutes.js';
 import mongoose from 'mongoose';
-import authRoutes from './routes/authRoutes.js';
+import favoriteRoutes from './routes/favoriteRoutes.js';
 
 dotenv.config();
 
@@ -20,11 +18,21 @@ app.use(cors({
   credentials: true
 }));
 
+// Añadir antes de las rutas
+app.use((req, res, next) => {
+    console.log('Request recibida:');
+    console.log('URL:', req.url);
+    console.log('Método:', req.method);
+    console.log('Body:', req.body);
+    console.log('Headers:', req.headers);
+    next();
+});
+
 // Un solo punto de entrada para todas las rutas
 app.use('/api', routes);
-app.use('/api/movies', movieRoutes);
+
+// Montar las rutas
 app.use('/api/favorites', favoriteRoutes);
-app.use('/api/auth', authRoutes);
 
 // Manejo de errores global
 app.use((err, req, res, next) => {

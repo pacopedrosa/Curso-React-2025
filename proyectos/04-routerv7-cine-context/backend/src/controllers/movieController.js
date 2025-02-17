@@ -1,4 +1,4 @@
-import Movie from '../models/Movie.js';
+import { Movie } from '../models/Movie.js';
 import { getMovieDetailsFromTMDB, getPopularMoviesFromTMDB } from '../services/tmdb.js';
 
 export const getPopularMovies = async (req, res) => {

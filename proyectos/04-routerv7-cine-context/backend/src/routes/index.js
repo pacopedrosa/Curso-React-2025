@@ -7,11 +7,18 @@ import userRoutes from './userRoutes.js';
 
 const router = express.Router();
 
+// Middleware de logging
+router.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+    console.log('Body:', req.body);
+    next();
+});
+
 // Configuración de rutas principales con manejo de errores
 router.use('/auth', authRoutes);
+router.use('/favorites', favoriteRoutes);
 router.use('/movies', movieRoutes);
 router.use('/reviews', reviewRoutes);
-router.use('/favorites', favoriteRoutes);
 router.use('/users', userRoutes);
 
 // Ruta de verificación de API
@@ -31,11 +38,12 @@ router.get('/health', (req, res) => {
 
 // Manejo de rutas no encontradas
 router.use('*', (req, res) => {
-  res.status(404).json({
-    error: 'Not Found',
-    message: 'La ruta solicitada no existe',
-    path: req.originalUrl
-  });
+    console.log('[404] Ruta no encontrada:', req.originalUrl);
+    res.status(404).json({
+        error: 'Not Found',
+        message: 'La ruta solicitada no existe',
+        path: req.originalUrl
+    });
 });
 
 // Manejo de errores global
