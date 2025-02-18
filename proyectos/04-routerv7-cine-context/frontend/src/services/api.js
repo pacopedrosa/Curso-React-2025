@@ -101,8 +101,7 @@ export const favoriteService = {
   },
   add: (movie) => {
     const movieData = {
-      id: movie.id,
-      movieId: movie.id,
+      id: movie.id || movie.movieId,
       title: movie.title,
       overview: movie.overview,
       poster_path: movie.poster_path,
@@ -118,8 +117,7 @@ export const favoriteService = {
       }
     });
   },
-  remove: (movie) => {
-    const movieId = movie.id || movie.movieId;
+  remove: (movieId) => {
     const token = localStorage.getItem('token');
     return api.delete(`/favorites/${movieId}`, {
       headers: {

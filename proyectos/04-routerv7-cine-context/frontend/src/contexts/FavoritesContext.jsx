@@ -70,7 +70,7 @@ export const FavoritesProvider = ({children}) => {
             return;
         }
         
-        const movieId = movie.movieId || movie.id;
+        const movieId = movie.id || movie.movieId;
         const token = localStorage.getItem('token');
         if (!token) {
             showToast('Sesión expirada, por favor vuelve a iniciar sesión', 'error');
@@ -78,14 +78,11 @@ export const FavoritesProvider = ({children}) => {
         }
 
         try {
-            console.log('Token actual:', token);
-            console.log('Intentando gestionar favorito para película:', movie);
-            
-            const isFav = favorites.some(fav => fav.movieId === movieId);
+            const isFav = favorites.some(fav => Number(fav.movieId) === Number(movieId));
             if (isFav) {
-                const response = await favoriteService.remove(movie);
+                const response = await favoriteService.remove(movieId);
                 if (response.data) {
-                    setFavorites(prev => prev.filter(fav => fav.movieId !== movieId));
+                    setFavorites(prev => prev.filter(fav => Number(fav.movieId) !== Number(movieId)));
                     showToast(`${movie.title} eliminada de favoritos`, "warning");
                 }
             } else {
@@ -99,8 +96,6 @@ export const FavoritesProvider = ({children}) => {
             console.error('Error detallado al gestionar favorito:', error);
             if (error.response?.status === 401) {
                 showToast('Sesión expirada, por favor vuelve a iniciar sesión', 'error');
-            } else if (error.response?.status === 404) {
-                showToast('Ruta de favoritos no encontrada', 'error');
             } else {
                 showToast('Error al gestionar favorito', 'error');
             }
