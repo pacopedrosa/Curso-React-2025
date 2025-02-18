@@ -8,6 +8,7 @@ import Reviews from '../pages/Reviews';
 import Favorites from '../pages/Favorites';
 import ErrorPage from '../pages/ErrorPage';
 import PrivateRoute from '../components/PrivateRoute';
+import Login from '../pages/Login';
 
 export const router = createBrowserRouter([
     {
@@ -17,11 +18,11 @@ export const router = createBrowserRouter([
         children: [
             {
                 index: true,
-                element: <Home />  // Página principal
+                element: <Home />
             },
             {
                 path: 'movies',
-                element: <MovieList />  // Lista de películas con filtros
+                element: <MovieList />
             },
             {
                 path: 'movie/:id',
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
             {
                 path: 'favorites',
                 element: <PrivateRoute><Favorites /></PrivateRoute>
+            },
+            {
+                path: 'login',
+                element: <Login />
             }
         ]
     }

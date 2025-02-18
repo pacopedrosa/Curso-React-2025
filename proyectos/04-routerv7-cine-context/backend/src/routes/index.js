@@ -14,6 +14,13 @@ router.use((req, res, next) => {
     next();
 });
 
+router.get('/', (req, res) => {
+      res.json({
+          welcome: true,
+          message: "Bienvenido al VideoClub"
+      });
+});
+
 // Configuración de rutas principales con manejo de errores
 router.use('/auth', authRoutes);
 router.use('/favorites', favoriteRoutes);

@@ -1,15 +1,29 @@
 import { Movie } from '../models/Movie.js';
 import { getMovieDetailsFromTMDB, getPopularMoviesFromTMDB } from '../services/tmdb.js';
 
+export const getHome = async (req, res) => {
+    try {
+        const featuredContent = {
+            welcome: true,
+            message: "Bienvenido al VideoClub",
+        };
+        
+        res.json(featuredContent);
+    } catch (error) {
+        console.error('Error al obtener contenido del home:', error);
+        res.status(500).json({ message: 'Error al cargar la página de inicio' });
+    }
+};
+
 export const getPopularMovies = async (req, res) => {
-  try {
-    const { page = 1 } = req.query;
-    const movies = await getPopularMoviesFromTMDB(page);
-    res.json(movies);
-  } catch (error) {
-    console.error('Error al obtener películas populares:', error);
-    res.status(500).json({ message: error.message });
-  }
+    try {
+        // Lógica existente para obtener películas populares
+        const popularMovies = await getPopularMoviesFromTMDB(req.query.page);
+        res.json(popularMovies);
+    } catch (error) {
+        console.error('Error al obtener películas populares:', error);
+        res.status(500).json({ message: 'Error al cargar las películas populares' });
+    }
 };
 
 export const getMovieById = async (req, res) => {

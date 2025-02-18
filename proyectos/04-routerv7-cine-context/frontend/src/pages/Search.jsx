@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useFetch } from '../hooks/useFetch'
 import { searchMovies } from '../services/tmdb'
 import SearchBox from '../components/SearchBox'
@@ -6,7 +7,8 @@ import MovieCard from '../components/MovieCard'
 import { PacmanLoader } from 'react-spinners'
 
 const Search = () => {
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('query') || '')
   const [page, setPage] = useState(1)
   
   const { data, loading, error } = useFetch(
@@ -14,8 +16,16 @@ const Search = () => {
     [searchQuery, page]
   )
 
+  useEffect(() => {
+    const query = searchParams.get('query')
+    if (query) {
+      setSearchQuery(query)
+    }
+  }, [searchParams])
+
   const handleSearch = (query) => {
     setSearchQuery(query)
+    setSearchParams({ query })
     setPage(1)
   }
 
@@ -31,7 +41,7 @@ const Search = () => {
     <div className="space-y-8">
       <h1 className="text-2xl font-bold text-sky-950">Buscar Películas</h1>
       
-      <SearchBox onSearch={handleSearch} />
+      <SearchBox onSearch={handleSearch} initialValue={searchQuery} />
 
       {error && (
         <div className="text-center text-red-600">
@@ -70,11 +80,11 @@ const Search = () => {
             </button>
           </div>
         </>
-      ) : searchQuery ? (
-        <p className="text-center text-gray-500">
-          No se encontraron resultados para &quot;{searchQuery}&quot;
-        </p>
-      ) : null}
+      ) : searchQuery && !loading && (
+        <div className="text-center text-gray-600">
+          <p>No se encontraron películas para &quot;{searchQuery}&quot;</p>
+        </div>
+      )}
     </div>
   )
 }

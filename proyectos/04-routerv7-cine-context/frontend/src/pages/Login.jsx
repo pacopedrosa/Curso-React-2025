@@ -20,18 +20,10 @@ const Login = () => {
         if (loading) return;
         
         setLoading(true);
-        console.log('Iniciando proceso de login...', credentials);
         
         try {
-            const result = await login(credentials);
-            console.log('Resultado del login:', result);
-            
-            // Esperar a que el estado se actualice
-            setTimeout(() => {
-                const from = location.state?.from?.pathname || '/';
-                navigate(from, { replace: true });
-            }, 100);
-            
+            await login(credentials);
+            navigate('/', { replace: true });
         } catch (error) {
             console.error('Error en login:', error);
             showToast(error.message || 'Error al iniciar sesión', 'error');

@@ -1,5 +1,3 @@
-- Falta que la pagina principal sea el home y si le clicas en peliculas muestra la que ahora es la pagina de peliculas
 - Falta que se pueda buscar
-- falta que funcionen los filtros
-- Falta que se vean todas las peliculas de la api
+- Falta que funcionen los filtros
 - Falta dockerizar el proyecto

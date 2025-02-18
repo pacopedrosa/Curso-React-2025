@@ -6,6 +6,7 @@ import connectDB from './config/db.js';
 import routes from './routes/index.js';
 import mongoose from 'mongoose';
 import favoriteRoutes from './routes/favoriteRoutes.js';
+import router from './routes/movieRoutes.js';
 
 dotenv.config();
 
@@ -30,9 +31,6 @@ app.use((req, res, next) => {
 
 // Un solo punto de entrada para todas las rutas
 app.use('/api', routes);
-
-// Montar las rutas
-app.use('/api/favorites', favoriteRoutes);
 
 // Manejo de errores global
 app.use((err, req, res, next) => {

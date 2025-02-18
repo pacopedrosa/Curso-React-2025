@@ -40,12 +40,11 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (credentials) => {
         try {
-            const { data } = await authService.login(credentials);
-            localStorage.setItem('token', data.token);
+            const { user } = await authService.login(credentials);
+            setUser(user);
             setIsAuthenticated(true);
-            setUser(data.user);
-            navigate('/');
             showToast('Inicio de sesión exitoso', 'success');
+            navigate('/');
             return { user };
         } catch (error) {
             console.error('Error en login:', error);
