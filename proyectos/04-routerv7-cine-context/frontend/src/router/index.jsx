@@ -7,6 +7,7 @@ import Search from '../pages/Search';
 import Reviews from '../pages/Reviews';
 import Favorites from '../pages/Favorites';
 import ErrorPage from '../pages/ErrorPage';
+import PrivateRoute from '../components/PrivateRoute';
 
 export const router = createBrowserRouter([
     {
@@ -14,32 +15,30 @@ export const router = createBrowserRouter([
         element: <RootLayout />,
         errorElement: <ErrorPage/>,
         children: [
-        {
-            index: true,
-            element: <Home />
-        },
-        {
-            path: 'movies',
-            element: <MovieList />
-        },
-        {
-            path: 'movie/:id',
-            element: <MovieDetail />
-        },
-        {
-            path: 'search',
-            element: <Search />
-        },
-        {
-            path: 'reviews',
-            element: <Reviews />
-        },
-        {
-            path: 'favorites',
-            element: <Favorites />
-        }
-
-    ]
-
+            {
+                index: true,
+                element: <Home />  // Página principal
+            },
+            {
+                path: 'movies',
+                element: <MovieList />  // Lista de películas con filtros
+            },
+            {
+                path: 'movie/:id',
+                element: <MovieDetail />
+            },
+            {
+                path: 'search',
+                element: <Search />
+            },
+            {
+                path: 'reviews',
+                element: <PrivateRoute><Reviews /></PrivateRoute>
+            },
+            {
+                path: 'favorites',
+                element: <PrivateRoute><Favorites /></PrivateRoute>
+            }
+        ]
     }
 ]);

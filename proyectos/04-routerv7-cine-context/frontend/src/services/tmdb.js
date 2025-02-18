@@ -87,9 +87,9 @@ const fetchFromAPI = async (endpoint, options = {}) => {
 };
 
 // función para obtener las películas populares
-export const getPopularMovies = async (page = 1) => {
+export const getPopularMovies = async (page = 1, sortBy = 'popularity.desc') => {
   try {
-    const { data } = await movieService.getPopular(page);
+    const { data } = await movieService.getPopular(page, sortBy);
     return data;
   } catch (error) {
     console.error('Error al obtener películas populares:', error);

@@ -40,9 +40,11 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (credentials) => {
         try {
-            const { user } = await authService.login(credentials);
-            setUser(user);
+            const { data } = await authService.login(credentials);
+            localStorage.setItem('token', data.token);
             setIsAuthenticated(true);
+            setUser(data.user);
+            navigate('/');
             showToast('Inicio de sesión exitoso', 'success');
             return { user };
         } catch (error) {

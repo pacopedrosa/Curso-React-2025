@@ -20,7 +20,7 @@ const MovieDetail = () => {
   const [loading, setLoading] = useState(true)
   const {data: videoData} = useFetch(() => getMovieVideos(movieId), [movieId])
   const { toggleFavorite, isFavorite } = useFavorites()
-  const isMovieFavorite = isFavorite(movieData?.id)
+  // const isMovieFavorite = isFavorite(movieData?.id)
   const { addReview, deleteReview, getMovieReviews } = useReviews()
   const movieReviews = getMovieReviews(movieId)
   const { isAuthenticated } = useAuth()

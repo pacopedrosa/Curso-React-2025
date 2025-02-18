@@ -8,10 +8,8 @@ const MovieList = () => {
   const [page, setPage] = useState(1)
   const [sortBy, setSortBy] = useState('popularity.desc')
   const [minRating, setMinRating] = useState(0)
-  const [movies, setMovies] = useState([])
-  const [loading, setLoading] = useState(true)
   
-  const { data, error } = useFetch(
+  const { data, loading, error } = useFetch(
     () => getPopularMovies(page, sortBy),
     [page, sortBy]
   )
@@ -19,21 +17,6 @@ const MovieList = () => {
   const filteredMovies = data?.results?.filter(
     movie => movie.vote_average >= minRating
   )
-
-  useEffect(() => {
-    const loadMovies = async () => {
-      try {
-        const data = await getPopularMovies()
-        setMovies(data.results)
-      } catch (error) {
-        console.error('Error cargando películas:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadMovies()
-  }, [])
 
   const handlePageChange = (newPage) => {
     window.scrollTo({
@@ -61,7 +44,11 @@ const MovieList = () => {
   }
 
   if (loading) {
-    return <div>Cargando películas...</div>
+    return (
+      <div className="flex justify-center items-center h-64">
+        <PacmanLoader color="#0369a1" />
+      </div>
+    )
   }
 
   return (
@@ -101,7 +88,7 @@ const MovieList = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {movies.map((movie) => (
+        {filteredMovies?.map((movie) => (
           <MovieCard key={movie.id} movie={movie} />
         ))}
       </div>
@@ -119,7 +106,7 @@ const MovieList = () => {
         <button
           className="px-4 py-2 rounded-lg bg-sky-800 transition-colors hover:bg-sky-950 text-white disabled:opacity-50"
           onClick={() => handlePageChange(page + 1)}
-          disabled={page === data?.total_pages}
+          disabled={data?.total_pages === page}
         >
           Siguiente
         </button>

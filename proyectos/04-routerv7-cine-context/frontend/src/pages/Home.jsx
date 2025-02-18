@@ -11,10 +11,10 @@ const Home = () => {
 
     if(error){
         return(
-            <div className="text-center p-10 ">
+            <div className="text-center p-10">
                 <h2 className="text-red-600 text-2xl font-bold">Error</h2>
-                <p className="text-red-600 text-2xl font-medium ">{error.message}</p>
-                <Link to="/" className="text-blue-600 text-2xl font-medium ">Volver a la pagina principal</Link>
+                <p className="text-red-600 text-2xl font-medium">{error.message}</p>
+                <Link to="/" className="text-blue-600 text-2xl font-medium">Volver a la página principal</Link>
             </div>
         )
     }
@@ -30,43 +30,38 @@ const Home = () => {
     return (
         <div className="space-y-8">
             <header className="text-center">
-                <h1 className="text-2xl font-bold text-sky-950">Bienvenido al Videoclub</h1>
-                <p className="text-lg font-medium text-sky-900">En esta pagina podras ver las peliculas mas populares</p>
+                <h1 className="text-2xl font-bold text-sky-950">Bienvenido al VideoClub</h1>
+                <p className="text-lg font-medium text-sky-900">Descubre nuestro catálogo completo de películas</p>
             </header>
 
-            <section className="">
-                <h2 className="text-2xl font-bold text-sky-950">Peliculas populares</h2>
-                {loading ? (
-                    <div className="flex justify-center items-center">
-                        <PacmanLoader color="blue" />
-                    </div>
-                ) : (
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <PacmanLoader color="#0369a1" />
+                </div>
+            ) : (
+                <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                        {data?.results?.map((movie) => (
+                        {data?.results?.map(movie => (
                             <MovieCard key={movie.id} movie={movie} />
                         ))}
                     </div>
-                )}
-
-                <div className="flex justify-center items-center mt-8 gap-2">
-                    <button 
-                        className="px-4 py-2 rounded-lg bg-sky-800 transition-colors hover:bg-sky-950 text-white" 
-                        onClick={() => handlePageChange(page - 1)} 
-                        disabled={page === 1}
-                    >
-                        Anterior
-                    </button>
-                    <span className="text-sky-950">{page}</span>
-
-                    <button 
-                        className="px-4 py-2 rounded-lg bg-sky-800 transition-colors hover:bg-sky-950 text-white" 
-                        onClick={() => handlePageChange(page + 1)} 
-                        disabled={page === data?.total_pages}
-                    >
-                        Siguiente
-                    </button>
-                </div>
-            </section>
+                    <div className="flex justify-center gap-4 mt-8">
+                        <button
+                            onClick={() => handlePageChange(page - 1)}
+                            disabled={page === 1}
+                            className="px-4 py-2 bg-sky-800 text-white rounded-lg disabled:opacity-50"
+                        >
+                            Anterior
+                        </button>
+                        <button
+                            onClick={() => handlePageChange(page + 1)}
+                            className="px-4 py-2 bg-sky-800 text-white rounded-lg"
+                        >
+                            Siguiente
+                        </button>
+                    </div>
+                </>
+            )}
         </div>
     )
 }
