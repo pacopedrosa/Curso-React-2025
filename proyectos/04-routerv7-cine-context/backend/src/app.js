@@ -6,7 +6,12 @@ import connectDB from './config/db.js';
 import routes from './routes/index.js';
 import mongoose from 'mongoose';
 import favoriteRoutes from './routes/favoriteRoutes.js';
-import router from './routes/movieRoutes.js';
+import movieRoutes from './routes/movieRoutes.js';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 dotenv.config();
 
@@ -32,6 +37,9 @@ app.use((req, res, next) => {
 // Un solo punto de entrada para todas las rutas
 app.use('/api', routes);
 
+// Montar las rutas de películas en /api/movies
+app.use('/api/movies', movieRoutes);
+
 // Manejo de errores global
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -44,7 +52,7 @@ const startServer = async () => {
   try {
     await connectDB();
     app.listen(PORT, () => {
-      console.log(`Servidor corriendo en puerto ${PORT}`);
+      console.log(`Servidor corriendo en http://localhost:${PORT}`);
     });
   } catch (error) {
     console.error('Error al iniciar el servidor:', error);

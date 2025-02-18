@@ -58,15 +58,91 @@ export const getMovieById = async (req, res) => {
 
 export const searchMovies = async (req, res) => {
   try {
-    const { query } = req.query;
-    const movies = await Movie.find({
-      $or: [
-        { title: { $regex: query, $options: 'i' } },
-        { overview: { $regex: query, $options: 'i' } }
-      ]
+    const { query, page = 1 } = req.query;
+    
+    if (!query) {
+      return res.status(400).json({ 
+        message: 'El parámetro de búsqueda es requerido' 
+      });
+    }
+
+    const TMDB_API_URL = 'https://api.themoviedb.org/3';
+    const url = `${TMDB_API_URL}/search/movie?api_key=${process.env.TMDB_API_KEY}&query=${encodeURIComponent(query)}&page=${page}&language=es-ES&include_adult=false`;
+    
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error('Error en la API de TMDB');
+    }
+
+    const data = await response.json();
+    
+    // Transformamos los resultados para incluir solo los campos necesarios
+    const results = data.results.map(movie => ({
+      id: movie.id,
+      title: movie.title,
+      poster_path: movie.poster_path,
+      overview: movie.overview,
+      release_date: movie.release_date,
+      vote_average: movie.vote_average
+    }));
+
+    res.json({
+      page: data.page,
+      results,
+      total_pages: data.total_pages,
+      total_results: data.total_results
     });
-    res.json(movies);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error en la búsqueda de películas:', error);
+    res.status(500).json({ 
+      message: 'Error al buscar películas',
+      error: error.message 
+    });
+  }
+};
+
+export const getMovieDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id || isNaN(id)) {
+      return res.status(400).json({ 
+        message: 'ID de película no válido' 
+      });
+    }
+
+    const TMDB_API_URL = 'https://api.themoviedb.org/3';
+    const url = `${TMDB_API_URL}/movie/${id}?api_key=${process.env.TMDB_API_KEY}&language=es-ES`;
+    
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error('Error en la API de TMDB');
+    }
+
+    const movieData = await response.json();
+    
+    // Transformamos los datos para incluir solo los campos necesarios
+    const movie = {
+      id: movieData.id,
+      title: movieData.title,
+      original_title: movieData.original_title,
+      poster_path: movieData.poster_path,
+      backdrop_path: movieData.backdrop_path,
+      overview: movieData.overview,
+      release_date: movieData.release_date,
+      vote_average: movieData.vote_average,
+      genres: movieData.genres,
+      runtime: movieData.runtime
+    };
+
+    res.json(movie);
+  } catch (error) {
+    console.error('Error al obtener detalles de la película:', error);
+    res.status(500).json({ 
+      message: 'Error al obtener detalles de la película',
+      error: error.message 
+    });
   }
 };

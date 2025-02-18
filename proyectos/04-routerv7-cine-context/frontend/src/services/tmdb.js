@@ -39,10 +39,27 @@
 //     return await fetchFromApi(`movie/${movieId}`)
 // }
 
-// //busqueda de una pelicula
-// export const searchMovies = async (query, page=1) => {
-//     return await fetchFromApi("search/movie", {query, page})
-// }
+//busqueda de una pelicula
+export const searchMovies = async (query, page = 1) => {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/movies/search?query=${encodeURIComponent(query)}&page=${page}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Error en la búsqueda de películas');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error al buscar películas:', error);
+    throw error;
+  }
+};
 
 // export const getMoviesVideos = async (movieId) => {
 //     return await fetchFromAPI(`movie/${movieId}/videos`)
@@ -105,17 +122,6 @@ export const getMovieDetails = async (id) => {
   } catch (error) {
     console.error('Error al obtener detalles de la película:', error);
     throw error;
-  }
-};
-
-// búsqueda de una película
-export const searchMovies = async (query, page = 1) => {
-  try {
-    const { data } = await movieService.searchMovies(query, page);
-    return data;
-  } catch (error) {
-    console.error('Error al buscar películas:', error);
-    return null;
   }
 };
 

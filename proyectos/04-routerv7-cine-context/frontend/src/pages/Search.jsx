@@ -60,31 +60,36 @@ const Search = () => {
               <MovieCard key={movie.id} movie={movie} />
             ))}
           </div>
-
           {/* Paginación */}
-          <div className="flex justify-center items-center mt-8 gap-2">
+          <div className="flex justify-center gap-4 mt-8">
             <button
-              className="px-4 py-2 rounded-lg bg-sky-800 transition-colors hover:bg-sky-950 text-white disabled:opacity-50"
               onClick={() => handlePageChange(page - 1)}
               disabled={page === 1}
+              className="px-4 py-2 bg-sky-800 text-white rounded-lg disabled:opacity-50"
             >
               Anterior
             </button>
-            <span className="text-sky-950">{page}</span>
+            <span className="text-sky-950">Página {page} de {data.total_pages}</span>
             <button
-              className="px-4 py-2 rounded-lg bg-sky-800 transition-colors hover:bg-sky-950 text-white disabled:opacity-50"
               onClick={() => handlePageChange(page + 1)}
-              disabled={page === data?.total_pages}
+              disabled={page >= data.total_pages}
+              className="px-4 py-2 bg-sky-800 text-white rounded-lg disabled:opacity-50"
             >
               Siguiente
             </button>
           </div>
         </>
-      ) : searchQuery && !loading && (
-        <div className="text-center text-gray-600">
-          <p>No se encontraron películas para &quot;{searchQuery}&quot;</p>
+      ) : searchQuery && !loading ? (
+        <div className="text-center space-y-4">
+          <p className="text-gray-600">No se encontraron películas para "{searchQuery}"</p>
+          <p className="text-gray-500">Sugerencias:</p>
+          <ul className="text-gray-500">
+            <li>Verifica que no haya errores de escritura</li>
+            <li>Intenta usar términos más generales</li>
+            <li>Prueba con el título original de la película</li>
+          </ul>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
