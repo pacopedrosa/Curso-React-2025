@@ -16,14 +16,44 @@ export const getHome = async (req, res) => {
 };
 
 export const getPopularMovies = async (req, res) => {
-    try {
-        // Lógica existente para obtener películas populares
-        const popularMovies = await getPopularMoviesFromTMDB(req.query.page);
-        res.json(popularMovies);
-    } catch (error) {
-        console.error('Error al obtener películas populares:', error);
-        res.status(500).json({ message: 'Error al cargar las películas populares' });
+  try {
+    const { page = 1, sort_by = 'popularity.desc' } = req.query;
+    
+    const TMDB_API_URL = 'https://api.themoviedb.org/3';
+    const url = `${TMDB_API_URL}/discover/movie?api_key=${process.env.TMDB_API_KEY}&language=es-ES&page=${page}&sort_by=${sort_by}&include_adult=false&vote_count.gte=100`;
+    
+    console.log('URL de la petición:', url); // Para debugging
+    
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error('Error en la API de TMDB');
     }
+
+    const data = await response.json();
+    
+    const results = data.results.map(movie => ({
+      id: movie.id,
+      title: movie.title,
+      poster_path: movie.poster_path,
+      overview: movie.overview,
+      release_date: movie.release_date,
+      vote_average: movie.vote_average
+    }));
+
+    res.json({
+      page: data.page,
+      results,
+      total_pages: data.total_pages,
+      total_results: data.total_results
+    });
+  } catch (error) {
+    console.error('Error al obtener películas populares:', error);
+    res.status(500).json({ 
+      message: 'Error al obtener películas populares',
+      error: error.message 
+    });
+  }
 };
 
 export const getMovieById = async (req, res) => {

@@ -1,3 +1,2 @@
-- Falta que se pueda buscar
 - Falta que funcionen los filtros
 - Falta dockerizar el proyecto
