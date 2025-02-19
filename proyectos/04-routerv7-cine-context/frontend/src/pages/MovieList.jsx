@@ -9,7 +9,10 @@ const MovieList = () => {
   const [sortBy, setSortBy] = useState('popularity.desc')
   const [minRating, setMinRating] = useState(0)
   
-  const { data, loading, error } = useFetch(() => getPopularMovies(page), [page])
+  const { data, loading, error } = useFetch(
+    () => getPopularMovies(page, sortBy), 
+    [page, sortBy]
+  )
 
   const filteredMovies = data?.results?.filter(
     movie => movie.vote_average >= minRating
