@@ -1,2 +1,0 @@
-- Falta que funcionen los filtros
-- Falta dockerizar el proyecto
