@@ -48,17 +48,22 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (credentials) => {
         try {
-            const { user } = await authService.login(credentials);
-            setUser(user);
-            setIsAuthenticated(true);
-            showToast('Inicio de sesión exitoso', 'success');
-            navigate('/');
-            return { user };
+            const response = await authService.login(credentials);
+            if (response.data && response.data.user) {
+                setUser(response.data.user);
+                setIsAuthenticated(true);
+                showToast('Inicio de sesión exitoso', 'success');
+                navigate('/');
+                return response.data;
+            } else {
+                throw new Error('Respuesta de login inválida');
+            }
         } catch (error) {
             console.error('Error en login:', error);
             setUser(null);
             setIsAuthenticated(false);
-            showToast(error.message || 'Error al iniciar sesión', 'error');
+            localStorage.removeItem('token');
+            showToast(error.response?.data?.message || 'Error al iniciar sesión', 'error');
             throw error;
         }
     };

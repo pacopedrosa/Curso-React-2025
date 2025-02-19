@@ -4,17 +4,19 @@ import {
   getHome,
   getPopularMovies, 
   getMovieDetails, 
-  searchMovies
+  searchMovies,
+  getMovieVideos 
 } from '../controllers/movieController.js';
 
 const router = Router();
 
 // Rutas públicas (no requieren autenticación)
-router.get('/popular', getPopularMovies); // Para la página de películas (/movies)
-router.get('/search', searchMovies);      // Para la búsqueda
-router.get('/:id', getMovieDetails);        // Para detalles de película
+router.get('/popular', getPopularMovies);
+router.get('/search', searchMovies);
+router.get('/:id', getMovieDetails);
+router.get('/:id/videos', getMovieVideos); // Add this new route
 
 // Rutas protegidas que requieren autenticación
 router.use(authMiddleware);
 
-export default router; 
+export default router;

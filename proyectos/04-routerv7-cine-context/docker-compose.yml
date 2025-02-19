@@ -10,7 +10,7 @@ services:
     environment:
       - VITE_BASE_URL=https://api.themoviedb.org/3
       - VITE_API_TOKEN=f806eb2fbd31b634c57f194bfa264cb8
-      - VITE_API_URL=http://backend:3000/api
+      - VITE_API_URL=http://localhost:3000/api
     depends_on:
       - backend
     networks:
@@ -25,6 +25,7 @@ services:
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/moviedb
       - TMDB_API_KEY=f806eb2fbd31b634c57f194bfa264cb8
+      - JWT_SECRET=tuSecretoSuperSeguro123
       - PORT=3000
     depends_on:
       - mongodb
@@ -37,6 +38,9 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=moviedb
+    command: mongod --bind_ip_all
     networks:
       - app-network
 
@@ -46,3 +50,4 @@ networks:
 
 volumes:
   mongodb_data:
+    driver: local

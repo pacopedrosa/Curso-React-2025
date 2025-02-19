@@ -4,16 +4,20 @@ import {
   createReview,
   getMovieReviews,
   getUserReviews,
-  deleteReview
+  deleteReview,
+  getGlobalReviews // Añadir esta importación
 } from '../controllers/reviewController.js';
 
 const router = express.Router();
 
-// Todas las rutas de reseñas requieren autenticación
+// Rutas públicas
+router.get('/movie/:movieId', getMovieReviews);
+router.get('/global', getGlobalReviews); // Nueva ruta global
+
+// Todas las demás rutas requieren autenticación
 router.use(authMiddleware);
 
 router.post('/', createReview);
-router.get('/movie/:movieId', getMovieReviews);
 router.get('/user', getUserReviews);
 router.delete('/:id', deleteReview);
 

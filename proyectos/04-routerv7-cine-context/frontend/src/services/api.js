@@ -5,50 +5,58 @@ const api = axios.create({
   withCredentials: true
 });
 
-// Interceptor para manejar errores de autenticación
-api.interceptors.response.use(
-  (response) => {
-    console.log('Respuesta exitosa:', response.status);
-    return response;
+// Interceptor para agregar el token a todas las peticiones
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
   },
   (error) => {
-    console.error('Error en la respuesta:', error.response?.status);
+    return Promise.reject(error);
+  }
+);
+
+// Interceptor para manejar errores
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
     if (error.response?.status === 401) {
+      localStorage.removeItem('token');
       console.log('Error de autenticación detectado');
     }
     return Promise.reject(error);
   }
 );
 
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-
 // Auth services
 export const authService = {
-  register: async (userData) => {
-    return await api.post('/auth/register', userData);
-  },
   login: async (credentials) => {
     try {
       const response = await api.post('/auth/login', credentials);
-      if (response.data.token) {
+      if (response.data && response.data.token) {
         localStorage.setItem('token', response.data.token);
-        api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
       }
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Error en login:', error);
       throw error;
     }
   },
-  verifyToken: () => api.get('/auth/verify'),
-  logout: () => api.post('/auth/logout')
+  register: async (userData) => {
+    const response = await api.post('/auth/register', userData);
+    if (response.data && response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    return response;
+  },
+  logout: () => {
+    localStorage.removeItem('token');
+    return api.post('/auth/logout');
+  },
+  verifyToken: () => api.get('/auth/verify')
 };
 
 // Movie services
@@ -91,41 +99,9 @@ export const reviewService = {
 
 // Favorite services
 export const favoriteService = {
-  getFavorites: () => {
-    const token = localStorage.getItem('token');
-    return api.get('/favorites', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-  },
-  add: (movie) => {
-    const movieData = {
-      id: movie.id || movie.movieId,
-      title: movie.title,
-      overview: movie.overview,
-      poster_path: movie.poster_path,
-      backdrop_path: movie.backdrop_path,
-      release_date: movie.release_date,
-      vote_average: movie.vote_average
-    };
-    
-    const token = localStorage.getItem('token');
-    return api.post('/favorites', movieData, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-  },
-  remove: (movieId) => {
-    const token = localStorage.getItem('token');
-    return api.delete(`/favorites/${movieId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-  }
+  getFavorites: () => api.get('/favorites'),
+  add: (movieData) => api.post('/favorites', movieData),
+  remove: (movieId) => api.delete(`/favorites/${movieId}`)
 };
-
 
 export default api; 

@@ -24,10 +24,10 @@ router.get('/', (req, res) => {
 // Rutas públicas
 router.use('/auth', authRoutes);
 router.use('/movies', movieRoutes);
-
-// Configuración de rutas principales con manejo de errores
-router.use('/favorites', favoriteRoutes);
 router.use('/reviews', reviewRoutes);
+
+// Rutas protegidas
+router.use('/favorites', favoriteRoutes);
 router.use('/users', userRoutes);
 
 // Ruta de verificación de API

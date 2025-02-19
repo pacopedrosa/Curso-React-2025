@@ -176,3 +176,32 @@ export const getMovieDetails = async (req, res) => {
     });
   }
 };
+export const getMovieVideos = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id || isNaN(id)) {
+      return res.status(400).json({ 
+        message: 'ID de película no válido' 
+      });
+    }
+
+    const TMDB_API_URL = 'https://api.themoviedb.org/3';
+    const url = `${TMDB_API_URL}/movie/${id}/videos?api_key=${process.env.TMDB_API_KEY}&language=es-ES`;
+    
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error('Error en la API de TMDB');
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Error al obtener videos de la película:', error);
+    res.status(500).json({ 
+      message: 'Error al obtener videos de la película',
+      error: error.message 
+    });
+  }
+};

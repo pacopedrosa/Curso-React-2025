@@ -69,36 +69,32 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    console.log('Intento de login para:', username);
-
+    
     const user = await User.findOne({ username });
     if (!user) {
-      console.log('Usuario no encontrado:', username);
       return res.status(401).json({ message: 'Credenciales inválidas' });
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      console.log('Contraseña incorrecta para:', username);
       return res.status(401).json({ message: 'Credenciales inválidas' });
     }
 
     const token = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: '24h' }
     );
 
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      path: '/'
+      maxAge: 24 * 60 * 60 * 1000 // 24 horas
     });
 
-    console.log('Login exitoso para:', username);
     res.json({
-      message: 'Login exitoso',
+      token,
       user: {
         id: user._id,
         username: user.username

@@ -19,28 +19,41 @@ export const getMovieReviews = async (req, res) => {
   try {
     const { movieId } = req.params;
     
-    // Obtener reseñas y datos de la película en paralelo
-    const [reviews, movieData] = await Promise.all([
-      Review.find({ movieId })
-        .populate('user', 'username')
-        .sort({ createdAt: -1 }),
-      getMovieDetailsFromTMDB(movieId)
-    ]);
+    const reviews = await Review.find({ movieId })
+      .populate('user', 'username email')
+      .sort({ createdAt: -1 });
+
+    const movieData = await getMovieDetailsFromTMDB(movieId);
 
     res.json({
       movie: movieData,
-      reviews
+      reviews: reviews.map(review => ({
+        _id: review._id,
+        text: review.text,
+        rating: review.rating,
+        createdAt: review.createdAt,
+        user: {
+          _id: review.user._id,
+          username: review.user.username
+        },
+        movieId: review.movieId
+      }))
     });
   } catch (error) {
+    console.error('Error al obtener reseñas:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
 export const getUserReviews = async (req, res) => {
   try {
-    const reviews = await Review.find({ user: req.user.id });
+    const reviews = await Review.find({ user: req.user.id })
+      .populate('user', 'username email')
+      .sort({ createdAt: -1 });
+      
     res.json(reviews);
   } catch (error) {
+    console.error('Error al obtener reseñas del usuario:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -55,4 +68,17 @@ export const deleteReview = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+export const getGlobalReviews = async (req, res) => {
+    try {
+        const reviews = await Review.find()
+            .populate('user', 'username email')
+            .sort({ createdAt: -1 });
+
+        res.json(reviews);
+    } catch (error) {
+        console.error('Error al obtener reseñas globales:', error);
+        res.status(500).json({ message: error.message });
+    }
 };

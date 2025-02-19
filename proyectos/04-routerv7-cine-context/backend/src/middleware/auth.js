@@ -3,24 +3,33 @@ import User from '../models/User.js';
 
 export const authMiddleware = async (req, res, next) => {
     try {
-        const token = req.cookies.token;
+        let token = req.cookies.token;
+        
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            token = authHeader.split(' ')[1];
+        }
         
         if (!token) {
-            return res.status(401).json({ message: 'No hay token' });
+            return res.status(401).json({ message: 'No hay token de autenticación' });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.userId = decoded.userId;
-        
-        const user = await User.findById(req.userId).select('-password');
-        if (!user) {
-            return res.status(401).json({ message: 'Usuario no encontrado' });
-        }
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const user = await User.findById(decoded.userId).select('-password');
+            
+            if (!user) {
+                return res.status(401).json({ message: 'Usuario no encontrado' });
+            }
 
-        req.user = user;
-        next();
+            req.user = user;
+            next();
+        } catch (error) {
+            return res.status(401).json({ message: 'Token inválido o expirado' });
+        }
     } catch (error) {
-        res.status(401).json({ message: 'Token inválido' });
+        console.error('Error en middleware de autenticación:', error);
+        res.status(500).json({ message: 'Error en el servidor' });
     }
 };
 

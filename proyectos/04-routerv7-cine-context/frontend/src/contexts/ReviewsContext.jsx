@@ -17,12 +17,24 @@ export const ReviewsProvider = ({ children }) => {
     const { showToast } = useToast();
     const { isAuthenticated } = useAuth();
     const [reviews, setReviews] = useState({});
+    const [globalReviews, setGlobalReviews] = useState({});
 
     useEffect(() => {
         if (isAuthenticated) {
             loadUserReviews();
         }
+        loadGlobalReviews();
     }, [isAuthenticated]);
+
+    const loadGlobalReviews = async () => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/reviews/global`);
+            const data = await response.json();
+            setGlobalReviews(data);
+        } catch (error) {
+            console.error('Error al cargar reseñas globales:', error);
+        }
+    };
 
     const loadUserReviews = async () => {
         try {
@@ -102,7 +114,7 @@ export const ReviewsProvider = ({ children }) => {
             reviews,
             addReview,
             deleteReview,
-            getMovieReviews: (movieId) => reviews[movieId] || []
+            getMovieReviews: (movieId) => [...(reviews[movieId] || []), ...(globalReviews[movieId] || [])]
         }}>
             {children}
         </ReviewsContext.Provider>
