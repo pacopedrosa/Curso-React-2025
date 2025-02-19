@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { FavoritesProvider } from './contexts/FavoritesContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -12,10 +12,11 @@ import MovieDetail from './pages/MovieDetail';
 import Favorites from './pages/Favorites';
 import Reviews from './pages/Reviews';
 import Profile from './pages/Profile';
+import Home from './pages/Home';
 
 const App = () => {
   return (
-    <BrowserRouter>
+    <Router>
       <ToastProvider>
         <AuthProvider>
           <FavoritesProvider>
@@ -24,9 +25,14 @@ const App = () => {
                 <Navbar />
                 <main className="container mx-auto py-4">
                   <Routes>
-                    <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/" element={<MovieList />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/" element={
+                      <PrivateRoute>
+                        <Home />
+                      </PrivateRoute>
+                    } />
                     <Route path="/movie/:id" element={<MovieDetail />} />
                     <Route path="/favorites" element={
                       <PrivateRoute>
@@ -50,7 +56,7 @@ const App = () => {
           </FavoritesProvider>
         </AuthProvider>
       </ToastProvider>
-    </BrowserRouter>
+    </Router>
   );
 };
 

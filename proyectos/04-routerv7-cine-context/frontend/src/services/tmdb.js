@@ -106,31 +106,19 @@ const fetchFromAPI = async (endpoint, options = {}) => {
 // función para obtener las películas populares
 export const getPopularMovies = async (page = 1, sortBy = 'popularity.desc') => {
   try {
-    const TMDB_BASE_URL = import.meta.env.VITE_BASE_URL;
-    const TMDB_API_KEY = import.meta.env.VITE_API_TOKEN;
-    
-    const url = `${TMDB_BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&language=es-ES&page=${page}&sort_by=${sortBy}&include_adult=false&vote_count.gte=100`;
-    
-    const response = await fetch(url);
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/movies/popular?page=${page}&sort_by=${sortBy}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
 
     if (!response.ok) {
       throw new Error('Error al obtener las películas');
     }
 
     const data = await response.json();
-    return {
-      page: data.page,
-      results: data.results.map(movie => ({
-        id: movie.id,
-        title: movie.title,
-        poster_path: movie.poster_path,
-        overview: movie.overview,
-        release_date: movie.release_date,
-        vote_average: movie.vote_average
-      })),
-      total_pages: data.total_pages,
-      total_results: data.total_results
-    };
+    return data;
   } catch (error) {
     console.error('Error al obtener películas populares:', error);
     throw error;

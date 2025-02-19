@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: DockerfileFrontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_BASE_URL=https://api.themoviedb.org/3
+      - VITE_API_TOKEN=f806eb2fbd31b634c57f194bfa264cb8
+      - VITE_API_URL=http://backend:3000/api
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: DockerfileBackend
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/moviedb
+      - TMDB_API_KEY=f806eb2fbd31b634c57f194bfa264cb8
+      - PORT=3000
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

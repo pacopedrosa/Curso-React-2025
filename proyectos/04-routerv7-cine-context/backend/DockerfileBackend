@@ -1,0 +1,23 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copiar package.json y package-lock.json
+COPY package*.json ./
+
+# Instalar dependencias
+RUN npm install
+
+# Copiar el resto de archivos
+COPY . .
+
+# Variables de entorno
+ENV PORT=3000
+ENV MONGODB_URI=mongodb://mongodb:27017/moviedb
+ENV TMDB_API_KEY=f806eb2fbd31b634c57f194bfa264cb8
+
+# Exponer el puerto
+EXPOSE 3000
+
+# Comando para iniciar la aplicación
+CMD ["npm", "start"]

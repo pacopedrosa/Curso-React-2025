@@ -27,7 +27,15 @@ export const AuthProvider = ({ children }) => {
                 setUser(data.user);
                 setIsAuthenticated(true);
             } catch (error) {
-                console.error('Error al verificar autenticación:', error);
+                if (error.response?.status === 401) {
+                    console.log('No hay sesión activa');
+                    const publicRoutes = ['/login', '/register'];
+                    if (!publicRoutes.includes(window.location.pathname)) {
+                        navigate('/login');
+                    }
+                } else {
+                    console.error('Error al verificar autenticación:', error);
+                }
                 setUser(null);
                 setIsAuthenticated(false);
             } finally {
@@ -36,7 +44,7 @@ export const AuthProvider = ({ children }) => {
         };
         
         checkAuth();
-    }, []);
+    }, [navigate]);
 
     const login = async (credentials) => {
         try {
@@ -68,12 +76,30 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const register = async (userData) => {
+        try {
+            const { data } = await authService.register(userData);
+            setUser(data.user);
+            setIsAuthenticated(true);
+            showToast('Registro exitoso', 'success');
+            navigate('/');
+            return data;
+        } catch (error) {
+            console.error('Error en registro:', error);
+            setUser(null);
+            setIsAuthenticated(false);
+            showToast(error.response?.data?.message || 'Error al registrar', 'error');
+            throw error;
+        }
+    };
+
     const value = {
         user,
         isAuthenticated,
         loading,
         login,
-        logout
+        logout,
+        register
     };
 
     return (

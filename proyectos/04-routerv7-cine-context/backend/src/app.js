@@ -20,7 +20,7 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:5173', // URL del frontend
+  origin: ['http://localhost:5173', 'http://frontend:5173'],
   credentials: true
 }));
 
@@ -34,7 +34,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Un solo punto de entrada para todas las rutas
+// Montar todas las rutas bajo /api
 app.use('/api', routes);
 
 // Montar las rutas de películas en /api/movies

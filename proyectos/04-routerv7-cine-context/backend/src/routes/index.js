@@ -21,10 +21,12 @@ router.get('/', (req, res) => {
       });
 });
 
-// Configuración de rutas principales con manejo de errores
+// Rutas públicas
 router.use('/auth', authRoutes);
-router.use('/favorites', favoriteRoutes);
 router.use('/movies', movieRoutes);
+
+// Configuración de rutas principales con manejo de errores
+router.use('/favorites', favoriteRoutes);
 router.use('/reviews', reviewRoutes);
 router.use('/users', userRoutes);
 
