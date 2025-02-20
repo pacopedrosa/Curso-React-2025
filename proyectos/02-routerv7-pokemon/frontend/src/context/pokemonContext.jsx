@@ -4,30 +4,41 @@ import { toast } from "sonner";
 const PokemonContext = createContext();
 
 export const PokemonProvider = ({ children }) => {
-    const [favorites, setFavorites] = useState([]); // Mueve el useState aquí
+    const [favorites, setFavorites] = useState([]);
 
-    const addToFavorites = (pokemon) => {
-        if(favorites.some((p) => p?.id === pokemon.id)){
-            toast.error("Este Pokémon ya está en tus favoritos", {
-                style: {
-                    background: 'red',
-                    color: 'white',
-                    border: '1px solid black',
-                    icon: '⭐',
-                }
+    const addToFavorites = async (pokemon) => {
+        try {
+            const response = await fetch('http://localhost:4000/api/favorites', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: pokemon.id,
+                    name: pokemon.name,
+                    sprites: pokemon.sprites || { 
+                        other: {
+                            dream_world: {
+                                front_default: pokemon.url
+                            }
+                        },
+                        front_default: pokemon.url
+                    }
+                })
             });
-            return;
-        }
-        setFavorites((prevFavorites) => [...prevFavorites, pokemon]);
-        toast.success("Pokemon añadido a favoritos"), {
-            style: {
-                background: 'green',
-                color: 'white',
-                border: '1px solid black',
+
+            if (!response.ok) {
+                throw new Error('Error al añadir a favoritos');
             }
+
+            // Actualizar el estado local de favoritos
+            setFavorites(prev => [...prev, pokemon]);
+            toast.success('Pokemon añadido a favoritos');
+        } catch (error) {
+            console.error('Error:', error);
+            toast.error('Error al añadir a favoritos');
         }
-        console.log(favorites);
-    }
+    };
 
     const removeFromFavorites = (pokemonId) => {
         setFavorites(prevFavorites => prevFavorites.filter(pokemon => pokemon.id!== pokemonId));
@@ -41,11 +52,16 @@ export const PokemonProvider = ({ children }) => {
     }
 
     return (
-        <PokemonContext.Provider value={{ favorites, addToFavorites, removeFromFavorites}}>
+        <PokemonContext.Provider value={{ 
+            favorites, 
+            setFavorites,
+            addToFavorites, 
+            removeFromFavorites 
+        }}>
             {children}
         </PokemonContext.Provider>
-    )
-}
+    );
+};
 
 export const usePokemon = () => {
     const context = useContext(PokemonContext);

@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { createFavoritosTable, createPokemonsTable } from "./models/Pokemon.js";
 import pokemonRoutes from "./routes/pokemonRoutes.js";
+import { initDatabase } from './config/db.js';
 
 dotenv.config();
 
@@ -10,9 +11,9 @@ const app = express();
 
 // Configuración de CORS
 const corsOptions = {
-    origin: 'http://localhost:5173', // URL de tu frontend
-    methods: ['GET', 'POST', 'DELETE'], // Métodos permitidos
-    credentials: true, // Permite credenciales
+    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    methods: ['GET', 'POST', 'DELETE'],
+    credentials: true,
     optionsSuccessStatus: 204
 };
 
@@ -45,7 +46,10 @@ app.use('/api', pokemonRoutes);
 // Inicializar servidor y crear tablas
 const initServer = async () => {
     try {
-        // Crear tablas si no existen
+        // Primero inicializar la base de datos
+        await initDatabase();
+        
+        // Luego crear las tablas
         await createPokemonsTable();
         await createFavoritosTable();
 
@@ -62,4 +66,5 @@ const initServer = async () => {
     }
 };
 
+// Iniciar el servidor
 initServer();

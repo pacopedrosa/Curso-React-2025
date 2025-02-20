@@ -6,7 +6,7 @@ import { createPokemonsTable, createFavoritosTable } from '../models/Pokemon.js'
 // En pokemonController.js
 // Modificar la función fetchPokemons
 
-const fetchPokemons = async (req, res) => {
+export const fetchPokemons = async (req, res) => {
   try {
       // Obtener los pokémon de la API
       const response = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=20');
@@ -56,49 +56,51 @@ const fetchPokemons = async (req, res) => {
 };
 
 // Función para obtener todos los Pokémon de la base de datos
-const getPokemons = async (req, res) => {
+export const getPokemons = async (req, res) => {
     try {
         const [pokemons] = await pool.query('SELECT * FROM pokemons ORDER BY id LIMIT 20');
         res.status(200).json(pokemons);
     } catch (error) {
         console.error('Error en getPokemons:', error);
         res.status(500).json({
-            error: 'Error al obtener los Pokémon de la base de datos',
+            error: 'Error al obtener los Pokémon',
             details: error.message
         });
     }
 };
 
 // Función para añadir un Pokémon a favoritos
-const addToFavorites = async (req, res) => {
-    const { pokemonId } = req.body;
-
-    if (!pokemonId) {
-        return res.status(400).json({ error: 'Se requiere el ID del Pokémon' });
-    }
-
+export const addToFavorites = async (req, res) => {
     try {
-        // Verificar si el Pokémon existe antes de añadirlo a favoritos
-        const [pokemonExists] = await pool.query('SELECT id FROM pokemons WHERE id = ?', [pokemonId]);
-
-        if (pokemonExists.length === 0) {
-            return res.status(404).json({ error: 'Pokémon no encontrado' });
-        }
-
-        // Verificar si ya está en favoritos
-        const [existingFavorite] = await pool.query(
-            'SELECT id FROM favoritos WHERE pokemon_id = ?',
-            [pokemonId]
+        const pokemon = req.body;
+        await pool.query(
+            `INSERT INTO favoritos (id, name, sprites) 
+             VALUES (?, ?, ?) 
+             ON DUPLICATE KEY UPDATE name = ?, sprites = ?`,
+            [
+                pokemon.id,
+                pokemon.name,
+                JSON.stringify({
+                    other: {
+                        dream_world: {
+                            front_default: pokemon.sprites?.other?.dream_world?.front_default
+                        }
+                    },
+                    front_default: pokemon.sprites?.front_default
+                }),
+                pokemon.name,
+                JSON.stringify({
+                    other: {
+                        dream_world: {
+                            front_default: pokemon.sprites?.other?.dream_world?.front_default
+                        }
+                    },
+                    front_default: pokemon.sprites?.front_default
+                })
+            ]
         );
 
-        if (existingFavorite.length > 0) {
-            return res.status(400).json({ error: 'Este Pokémon ya está en favoritos' });
-        }
-
-        // Añadir a favoritos
-        await pool.query('INSERT INTO favoritos (pokemon_id) VALUES (?)', [pokemonId]);
-        res.status(200).json({ message: 'Pokémon añadido a favoritos exitosamente' });
-
+        res.status(200).json({ message: 'Pokemon añadido a favoritos' });
     } catch (error) {
         console.error('Error en addToFavorites:', error);
         res.status(500).json({
@@ -109,15 +111,17 @@ const addToFavorites = async (req, res) => {
 };
 
 // Función para obtener todos los Pokémon favoritos
-const getFavorites = async (req, res) => {
+export const getFavorites = async (req, res) => {
     try {
-        const [favorites] = await pool.query(`
-            SELECT pokemons.* 
-            FROM favoritos
-            JOIN pokemons ON favoritos.pokemon_id = pokemons.id
-            ORDER BY pokemons.id
-        `);
-        res.status(200).json(favorites);
+        const [favorites] = await pool.query('SELECT * FROM favoritos ORDER BY id');
+        
+        // Parsear los sprites JSON a objeto
+        const parsedFavorites = favorites.map(favorite => ({
+            ...favorite,
+            sprites: typeof favorite.sprites === 'string' ? JSON.parse(favorite.sprites) : favorite.sprites
+        }));
+        
+        res.status(200).json(parsedFavorites);
     } catch (error) {
         console.error('Error en getFavorites:', error);
         res.status(500).json({
@@ -128,24 +132,68 @@ const getFavorites = async (req, res) => {
 };
 
 // Función para obtener un Pokémon por nombre
-const getPokemonByName = async (req, res) => {
-    const { name } = req.params;
-    
+export const getPokemonByName = async (req, res) => {
     try {
-        const [pokemon] = await pool.query(
-            'SELECT * FROM pokemons WHERE name = ?',
-            [name]
+        const { name } = req.params;
+        
+        // Primero buscar en nuestra base de datos
+        const [localPokemon] = await pool.query(
+            'SELECT * FROM pokemons WHERE name LIKE ?',
+            [`%${name.toLowerCase()}%`]
         );
 
-        if (pokemon.length === 0) {
-            return res.status(404).json({ error: 'Pokémon no encontrado' });
+        if (localPokemon.length > 0) {
+            return res.status(200).json(localPokemon[0]);
         }
 
-        res.status(200).json(pokemon[0]);
+        // Si no está en nuestra base de datos, buscar en la API externa
+        const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`);
+        const pokemon = response.data;
+
+        // Guardar en nuestra base de datos
+        await pool.query(
+            `INSERT INTO pokemons (id, name, sprites) 
+             VALUES (?, ?, ?) 
+             ON DUPLICATE KEY UPDATE name = ?, sprites = ?`,
+            [
+                pokemon.id,
+                pokemon.name,
+                JSON.stringify({
+                    other: {
+                        dream_world: {
+                            front_default: pokemon.sprites.other.dream_world.front_default
+                        }
+                    },
+                    front_default: pokemon.sprites.front_default
+                }),
+                pokemon.name,
+                JSON.stringify({
+                    other: {
+                        dream_world: {
+                            front_default: pokemon.sprites.other.dream_world.front_default
+                        }
+                    },
+                    front_default: pokemon.sprites.front_default
+                })
+            ]
+        );
+
+        res.status(200).json({
+            id: pokemon.id,
+            name: pokemon.name,
+            sprites: {
+                other: {
+                    dream_world: {
+                        front_default: pokemon.sprites.other.dream_world.front_default
+                    }
+                },
+                front_default: pokemon.sprites.front_default
+            }
+        });
     } catch (error) {
         console.error('Error en getPokemonByName:', error);
-        res.status(500).json({
-            error: 'Error al buscar el Pokémon por nombre',
+        res.status(404).json({
+            error: 'Pokemon no encontrado',
             details: error.message
         });
     }
@@ -170,11 +218,8 @@ const removeFromFavorites = async (req, res) => {
     }
 };
 
+
+
 export {
-    fetchPokemons,
-    getPokemons,
-    addToFavorites,
-    getFavorites,
-    getPokemonByName,
     removeFromFavorites
 };

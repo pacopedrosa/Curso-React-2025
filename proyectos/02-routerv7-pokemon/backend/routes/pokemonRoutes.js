@@ -10,11 +10,15 @@ import {
 
 const router = express.Router();
 
+// Ruta para obtener y guardar pokemons desde la API externa
 router.get('/fetch-pokemons', fetchPokemons);
+
+// Ruta para obtener pokemons de nuestra base de datos
 router.get('/pokemons', getPokemons);
+
 router.post('/favorites', addToFavorites);
 router.get('/favorites', getFavorites);
 router.get('/search/:name', getPokemonByName);
-router.delete('/favorites/:pokemonId', removeFromFavorites);
+router.delete('/favorites/:id', removeFromFavorites);
 
 export default router;

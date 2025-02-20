@@ -15,7 +15,7 @@ const pool = mysql.createPool({
 });
 
 // Función para inicializar la base de datos
-const initDatabase = async () => {
+export const initDatabase = async () => {
     try {
         // Crear la base de datos si no existe
         const connection = await mysql.createConnection({
@@ -41,8 +41,5 @@ const initDatabase = async () => {
         process.exit(1); // Terminar el proceso si hay un error crítico
     }
 };
-
-// Inicializar la base de datos
-initDatabase();
 
 export default pool;

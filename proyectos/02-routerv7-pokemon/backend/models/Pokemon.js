@@ -23,9 +23,10 @@ export const createPokemonsTable = async () => {
 export const createFavoritosTable = async () => {
     const sql = `
         CREATE TABLE IF NOT EXISTS favoritos (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            pokemon_id INT NOT NULL,
-            FOREIGN KEY (pokemon_id) REFERENCES pokemons(id) ON DELETE CASCADE
+            id INT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            sprites JSON,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `;
 

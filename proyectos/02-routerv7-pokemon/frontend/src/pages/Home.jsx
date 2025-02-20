@@ -10,20 +10,38 @@ function Home() {
   const { addToFavorites } = usePokemon();
 
   useEffect(() => {
+    console.log("API URL:", import.meta.env.VITE_API_URL);
     fetchPokemons();
   }, []);
 
   const fetchPokemons = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/fetch-pokemons`);
+      console.log("Intentando fetch a:", import.meta.env.VITE_API_URL);
+      
+      // Primero intentamos obtener los pokémon de nuestra base de datos
+      const response = await fetch('http://localhost:4000/api/pokemons', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
       if (!response.ok) {
-        throw new Error("Error fetching data");
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+      
       const data = await response.json();
-      setPokemons(data.pokemons); // Ahora data.pokemons contiene el array de pokémons completo
+      console.log("Datos recibidos:", data);
+      
+      if (Array.isArray(data)) {
+        setPokemons(data);
+      } else {
+        console.error("La respuesta no es un array:", data);
+        setError("Formato de datos incorrecto");
+      }
+      
     } catch (error) {
-      console.error("Error fetching pokemons:", error);
+      console.error("Error detallado:", error);
       setError("Error al cargar los Pokémon. Por favor, intenta de nuevo.");
     } finally {
       setIsLoading(false);
@@ -54,7 +72,18 @@ function Home() {
             <h2 className="text-lg font-bold text-center mb-2">{pokemon.name}</h2>
             <div className="flex justify-center space-x-2 mt-4">
               <button 
-                onClick={() => addToFavorites(pokemon)} 
+                onClick={() => addToFavorites({
+                    id: pokemon.id,
+                    name: pokemon.name,
+                    sprites: {
+                        other: {
+                            dream_world: {
+                                front_default: pokemon.url
+                            }
+                        },
+                        front_default: pokemon.url
+                    }
+                })} 
                 className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors duration-300"
               >
                 Añadir a favoritos
