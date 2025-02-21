@@ -1,11 +1,15 @@
 import { ProductProvider } from "./context/ProductContext"
-import ProductList from "./components/ProductsList.jsx"
+import AuthProvider from "./context/AuthContext.jsx"
+import { RouterProvider } from "react-router-dom"
+import { router } from "./router/index.jsx"
 
 const App = () => {
   return (
-    <ProductProvider>
-      <ProductList></ProductList>
-    </ProductProvider>
+    <AuthProvider>
+      <ProductProvider>
+        <RouterProvider router={router}/>
+      </ProductProvider>
+    </AuthProvider>
   )
 }
 
