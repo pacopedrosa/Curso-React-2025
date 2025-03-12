@@ -5,6 +5,11 @@ import LoginPage from "../pages/LoginPage"
 import RegisterPage from "../pages/RegisterPage"
 import ProtectedRoute from "../components/ProtectedRoute"
 import ProductsPage from "../pages/ProductsPage"
+import { DashboardPage } from "../pages/DashboardPage"
+import CreateProductPage from "../pages/CreateProductPage"
+import EditProductPage from "../pages/EditProductPage"
+import DeleteProduct from "../pages/DeleteProduct"
+import ProductDetail from "../pages/ProductDetail"
 
 export const router = createBrowserRouter([
     {
@@ -30,6 +35,47 @@ export const router = createBrowserRouter([
                   <ProtectedRoute>
                     <ProductsPage />
                   </ProtectedRoute>
+                ),
+            },
+            {
+                path: "dashboard",
+                element: (
+                    <ProtectedRoute>
+                        <DashboardPage />
+                    </ProtectedRoute>
+                )
+
+            },
+            {
+                path: "create-product",
+                element: (
+                    <ProtectedRoute>
+                        <CreateProductPage />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: "product/:id",
+                element: (
+                    <ProtectedRoute>
+                        <EditProductPage />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: "delete-product/:id",
+                element: (
+                    <ProtectedRoute>
+                        <DeleteProduct />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: "productDetails/:id",
+                element: (
+                    <ProtectedRoute>
+                        <ProductDetail />
+                    </ProtectedRoute>
                 )
             }
         ]
